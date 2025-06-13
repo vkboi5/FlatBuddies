@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -19,66 +19,256 @@ import {
   StepLabel,
   IconButton,
   Input,
+  Stack,
+  Slider,
+  OutlinedInput,
+  Chip,
+  Avatar,
+  Autocomplete,
 } from '@mui/material';
 import {
-  FaUser, FaHome, FaHeart, FaSmoking, FaPaw, FaUtensils,
+  FaUser, FaHome, FaHeart, FaSmoking, FaPaw, FaUtensils, FaBroom, FaUsers, FaLaptop, FaBuilding,
 } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
+import UserTypeModal from '../components/UserTypeModal';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { initializeApp } from 'firebase/app';
+import { useUserType } from '../contexts/UserTypeContext';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import { createFilterOptions } from '@mui/material/Autocomplete';
+import LocationMapModal from '../components/LocationMapModal';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAP3ruMIUK4A8AHo-I1AaRG6BFXv8gwXxQ",
+  authDomain: "flatbuddies-e6e7b.firebaseapp.com",
+  projectId: "flatbuddies-e6e7b",
+  storageBucket: "flatbuddies-e6e7b.appspot.com",
+  messagingSenderId: "643218990933",
+  appId: "1:643218990933:web:5195d4928a69cd834231dc"
+};
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+const interestsOptions = [
+  'Reading', 'Writing', 'Music', 'Movies', 'Gaming', 'Sports', 'Fitness', 'Hiking', 'Camping',
+  'Cooking', 'Baking', 'Gardening', 'Photography', 'Painting', 'Drawing', 'Crafts', 'Fashion',
+  'Travel', 'Languages', 'Volunteering', 'Technology', 'Science', 'History', 'Politics',
+  'Animals', 'Cars', 'Motorcycles', 'Dancing', 'Yoga', 'Meditation', 'Cycling', 'Swimming',
+  'Running', 'Fishing', 'Hunting', 'Collecting', 'Board Games', 'Puzzles', 'Cars', 'Motorcycles'
+];
+
+const sampleLocations = [
+  "New Delhi, Connaught Place", "New Delhi, Dwarka", "New Delhi, Karol Bagh",
+  "Mumbai, Bandra", "Mumbai, Andheri", "Mumbai, Powai",
+  "Bengaluru, Koramangala", "Bengaluru, HSR Layout", "Bengaluru, Indiranagar",
+  "Chennai, Adyar", "Chennai, T. Nagar", "Chennai, Velachery",
+  "Kolkata, Salt Lake", "Kolkata, New Town", "Kolkata, Ballygunge",
+  "Hyderabad, Gachibowli", "Hyderabad, Hitech City", "Hyderabad, Banjara Hills",
+  "Pune, Koregaon Park", "Pune, Baner", "Pune, Hadapsar",
+  "Ahmedabad, Satellite", "Ahmedabad, SG Highway", "Ahmedabad, Thaltej",
+  "Jaipur, Malviya Nagar", "Jaipur, C Scheme", "Jaipur, Vaishali Nagar",
+  "Lucknow, Hazratganj", "Lucknow, Gomti Nagar", "Lucknow, Aliganj"
+];
+
+const filterOptions = createFilterOptions();
 
 const OnboardingProfile = () => {
   const navigate = useNavigate();
-  const { updateProfile, currentUser } = useAuth();
+  const { updateProfile, currentUser, userProfile, loading } = useAuth();
+  const { userType, setUserType } = useUserType();
   const [step, setStep] = useState(1);
+  const [showUserTypeModal, setShowUserTypeModal] = useState(true);
+  const [showMapModal, setShowMapModal] = useState(false);
   const [formData, setFormData] = useState({
-    // Basic Info
     name: '',
     age: '',
     gender: '',
     occupation: '',
     bio: '',
     photos: [],
-    
-    // Location
+    interests: [],
     location: {
+      type: 'Point',
+      coordinates: [0, 0],
       city: '',
       area: '',
-      preferredLocations: []
     },
-    
-    // Living Preferences
+    preferences: {
     budget: {
       min: '',
       max: ''
     },
-    moveInDate: '',
-    stayDuration: '',
-    
-    // Lifestyle
-    lifestyle: {
-      smoking: '',
-      pets: '',
-      foodPreference: '',
-      cleanlinessPreference: '',
-      sleepSchedule: '',
-      socialPreference: ''
-    },
-    
-    // Roommate Preferences
-    roommatePreferences: {
+      roommates: {
       gender: '',
       ageRange: {
         min: '',
         max: ''
+        }
       },
-      occupation: '',
-      smoking: '',
-      pets: ''
+      lifestyle: {
+        cleanliness: 5,
+        socialLevel: 5,
+        workMode: 'office',
+        smoking: 'no',
+        pets: 'no',
+        foodPreference: 'any'
+      }
     }
   });
+
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+
+  useEffect(() => {
+    if (!loading && currentUser && userProfile) {
+      if (userProfile.onboarded) {
+        navigate('/explore');
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          name: userProfile.name || '',
+          userType: userProfile.userType || '',
+          age: userProfile.profile?.age || '',
+          gender: userProfile.profile?.gender || '',
+          occupation: userProfile.profile?.occupation || '',
+          bio: userProfile.profile?.bio || '',
+          photos: userProfile.profile?.photos || [],
+          interests: userProfile.profile?.interests || [],
+          location: {
+            city: userProfile.profile?.location?.city || '',
+            area: userProfile.profile?.location?.area || '',
+            coordinates: userProfile.profile?.location?.coordinates || [0, 0]
+          },
+          preferences: {
+            budget: {
+              min: userProfile.profile?.preferences?.budget?.min || '',
+              max: userProfile.profile?.preferences?.budget?.max || ''
+            },
+            roommates: {
+              gender: userProfile.profile?.preferences?.roommates?.gender || '',
+              ageRange: {
+                min: userProfile.profile?.preferences?.roommates?.ageRange?.min || '',
+                max: userProfile.profile?.preferences?.roommates?.ageRange?.max || ''
+              }
+            },
+            lifestyle: {
+              cleanliness: userProfile.profile?.preferences?.lifestyle?.cleanliness || 5,
+              socialLevel: userProfile.profile?.preferences?.lifestyle?.socialLevel || 5,
+              workMode: userProfile.profile?.preferences?.lifestyle?.workMode || 'office',
+              smoking: userProfile.profile?.preferences?.lifestyle?.smoking || 'no',
+              pets: userProfile.profile?.preferences?.lifestyle?.pets || 'no',
+              foodPreference: userProfile.profile?.preferences?.lifestyle?.foodPreference || 'any'
+            }
+          }
+        }));
+        setUserType(userProfile.userType || null);
+        if (userProfile.profile?.photos && userProfile.profile.photos.length > 0) {
+          setPhotoPreview(userProfile.profile.photos[0]);
+        }
+      }
+    }
+  }, [loading, currentUser, userProfile, navigate, setUserType]);
+
+  const handleUserTypeSelect = (type) => {
+    setUserType(type);
+    setShowUserTypeModal(false);
+    setFormData(prev => ({
+      ...prev,
+      userType: type
+    }));
+  };
+
+  const getSteps = () => {
+    if (userType === 'room_seeker') {
+      return [
+        'Basic Information',
+        'Location & Budget',
+        'Lifestyle Preferences',
+        'Roommate Preferences'
+      ];
+    } else {
+      return [
+        'Basic Information',
+        'Location & Property Details',
+        'Lifestyle Preferences',
+        'Roommate Preferences'
+      ];
+    }
+  };
+
+  const validateStep = (currentStep) => {
+    switch (currentStep) {
+      case 1:
+        return formData.name && formData.age && formData.gender && formData.location.city;
+      case 2:
+        if (userType === 'room_seeker') {
+          return formData.preferences.budget.min && formData.preferences.budget.max;
+        } else {
+          return formData.preferences.budget.min;
+        }
+      case 3:
+        return true; // Always return true for step 3 as we set default values
+      case 4:
+        return formData.preferences.roommates.gender && 
+               formData.preferences.roommates.ageRange.min && 
+               formData.preferences.roommates.ageRange.max;
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    // Set default values for lifestyle preferences if not set
+    if (step === 2) {
+      setFormData(prev => ({
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          lifestyle: {
+            cleanliness: prev.preferences.lifestyle.cleanliness || 5,
+            socialLevel: prev.preferences.lifestyle.socialLevel || 5,
+            workMode: prev.preferences.lifestyle.workMode || 'office',
+            smoking: prev.preferences.lifestyle.smoking || 'no',
+            pets: prev.preferences.lifestyle.pets || 'no',
+            foodPreference: prev.preferences.lifestyle.foodPreference || 'any'
+          }
+        }
+      }));
+    }
+
+    if (validateStep(step)) {
+      console.log('Moving from step', step, 'to step', step + 1);
+      setTimeout(() => {
+        setStep(prevStep => {
+          console.log('Setting step to:', prevStep + 1);
+          return prevStep + 1;
+        });
+      }, 0);
+    } else {
+      console.log('Step', step, 'validation failed');
+      toast.error('Please fill in all required fields before proceeding.');
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+      const [parent, child, grandChild] = name.split('.');
+      if (parent === 'location' && child === 'city' || parent === 'location' && child === 'area') {
+        return;
+      }
+      if (grandChild) {
+        setFormData(prev => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: {
+              ...prev[parent][child],
+              [grandChild]: value
+            }
+          }
+        }));
+      } else {
       setFormData(prev => ({
         ...prev,
         [parent]: {
@@ -86,7 +276,9 @@ const OnboardingProfile = () => {
           [child]: value
         }
       }));
+      }
     } else {
+      // Handle top-level fields
       setFormData(prev => ({
         ...prev,
         [name]: value
@@ -94,23 +286,110 @@ const OnboardingProfile = () => {
     }
   };
 
+  const handleLocationSelect = (selectedLocation) => {
+    setFormData(prev => ({
+      ...prev,
+      location: {
+        ...prev.location,
+        city: selectedLocation.city,
+        area: selectedLocation.area,
+        coordinates: selectedLocation.coordinates,
+      }
+    }));
+    setShowMapModal(false);
+  };
+
   const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
-    // Handle photo upload logic here
+    const file = e.target.files[0];
+    if (file) {
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    } else {
+      setPhotoFile(null);
+      setPhotoPreview(null);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log('Current user UID before updateProfile:', currentUser?.uid);
-      await updateProfile(formData);
-      navigate('/dashboard');
+      let photoUrl = '';
+      if (photoFile) {
+        const storageRef = ref(storage, `profile_photos/${currentUser.uid}/${photoFile.name}`);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        photoUrl = await getDownloadURL(snapshot.ref);
+        toast.success('Personal photo uploaded!');
+      } else if (photoPreview) {
+        photoUrl = formData.photos[0] || '';
+      }
+
+      const profileData = {
+        name: formData.name,
+        userType: userType,
+        onboarded: true,
+        profile: {
+          age: parseInt(formData.age),
+          gender: formData.gender,
+          occupation: formData.occupation,
+          bio: formData.bio,
+          photos: photoUrl ? [photoUrl] : [],
+          interests: formData.interests,
+          location: {
+            type: 'Point',
+            coordinates: formData.location.coordinates,
+            city: formData.location.city,
+            area: formData.location.area
+          },
+          preferences: {
+            budget: {
+              min: parseInt(formData.preferences.budget.min),
+              max: parseInt(formData.preferences.budget.max)
+            },
+            roommates: {
+              gender: formData.preferences.roommates.gender,
+              ageRange: {
+                min: parseInt(formData.preferences.roommates.ageRange.min),
+                max: parseInt(formData.preferences.roommates.ageRange.max)
+              }
+            },
+            lifestyle: {
+              cleanliness: formData.preferences.lifestyle.cleanliness || 5,
+              socialLevel: formData.preferences.lifestyle.socialLevel || 5,
+              workMode: formData.preferences.lifestyle.workMode || 'office',
+              smoking: formData.preferences.lifestyle.smoking || 'no',
+              pets: formData.preferences.lifestyle.pets || 'no',
+              foodPreference: formData.preferences.lifestyle.foodPreference || 'any'
+            }
+          }
+        }
+      };
+
+      console.log('Submitting profile data:', profileData);
+      await updateProfile(profileData);
+      toast.success('Profile created successfully!');
+      navigate('/explore');
     } catch (error) {
       console.error('Error updating profile:', error);
+      toast.error(error.message || 'Failed to update profile. Please try again.');
     }
   };
 
+  const handleSliderChange = (name) => (event, newValue) => {
+    setFormData(prev => ({
+      ...prev,
+      preferences: {
+        ...prev.preferences,
+        lifestyle: {
+          ...prev.preferences.lifestyle,
+          [name]: newValue
+        }
+      }
+    }));
+  };
+
   const renderStep = () => {
+    if (!userType) return null;
+
     switch (step) {
       case 1:
         return (
@@ -130,6 +409,7 @@ const OnboardingProfile = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   variant="outlined"
+                  required
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -141,10 +421,11 @@ const OnboardingProfile = () => {
                   value={formData.age}
                   onChange={handleInputChange}
                   variant="outlined"
+                  required
                 />
               </Grid>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant="outlined">
+                <FormControl fullWidth variant="outlined" required>
                   <InputLabel>Gender</InputLabel>
                   <Select
                     name="gender"
@@ -182,18 +463,86 @@ const OnboardingProfile = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel shrink htmlFor="photo-upload">
-                    Photos
-                  </InputLabel>
-                  <Input
-                    type="file"
+                <TextField
+                  fullWidth
+                  label="Location"
+                  value={formData.location.city ? `${formData.location.city}${formData.location.area ? ', ' + formData.location.area : ''}` : ''}
+                  onClick={() => setShowMapModal(true)}
+                  onFocus={(e) => e.target.blur()}
+                  readOnly
+                  variant="outlined"
+                  required
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="interests-label">Interests</InputLabel>
+                  <Select
+                    labelId="interests-label"
                     multiple
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    id="photo-upload"
-                  />
+                    name="interests"
+                    value={formData.interests}
+                    onChange={handleInputChange}
+                    input={<OutlinedInput id="select-multiple-chip" label="Interests" />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} />
+                        ))}
+                      </Box>
+                    )}
+                  >
+                    {interestsOptions.map((interest) => (
+                      <MenuItem
+                        key={interest}
+                        value={interest}
+                        style={{
+                          fontWeight: formData.interests.indexOf(interest) === -1
+                            ? 'normal'
+                            : 'bold',
+                        }}
+                      >
+                        {interest}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                  Personal Photo
+                </Typography>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  style={{ display: 'none' }}
+                  id="personal-photo-upload"
+                />
+                <label htmlFor="personal-photo-upload">
+                  <Button variant="outlined" component="span" startIcon={<AddAPhotoIcon />}>
+                    Upload Photo
+                  </Button>
+                </label>
+                {photoPreview && (
+                  <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                    <Avatar src={photoPreview} sx={{ width: 80, height: 80, mr: 2 }} />
+                    <Button
+                      variant="text"
+                      color="error"
+                      onClick={() => {
+                        setPhotoFile(null);
+                        setPhotoPreview(null);
+                        setFormData(prev => ({ ...prev, photos: [] }));
+                      }}
+                    >
+                      Remove Photo
+                    </Button>
+                  </Box>
+                )}
               </Grid>
             </Grid>
           </motion.div>
@@ -206,51 +555,47 @@ const OnboardingProfile = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 3 }}>
-              Location & Budget
+              {userType === 'room_seeker' ? 'Location & Budget' : 'Location & Property Details'}
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="City"
-                  name="location.city"
-                  value={formData.location.city}
-                  onChange={handleInputChange}
-                  variant="outlined"
+              {userType === 'room_seeker' ? (
+                <>
+                  <Grid item xs={12}>
+                    <Typography gutterBottom>Budget Range (₹)</Typography>
+                    <Slider
+                      value={[formData.preferences.budget.min, formData.preferences.budget.max]}
+                      onChange={(e, newValue) => setFormData(prev => ({
+                        ...prev,
+                        preferences: {
+                          ...prev.preferences,
+                          budget: {
+                            min: newValue[0],
+                            max: newValue[1]
+                          }
+                        }
+                      }))}
+                      valueLabelDisplay="auto"
+                      min={1000}
+                      max={100000}
+                      step={1000}
+                      disableSwap
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+                </>
+              ) : (
+                <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Area"
-                  name="location.area"
-                  value={formData.location.area}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Minimum Budget"
+                    label="Rent Amount"
                   type="number"
-                  name="budget.min"
-                  value={formData.budget.min}
+                    name="preferences.budget.min"
+                    value={formData.preferences.budget.min}
                   onChange={handleInputChange}
                   variant="outlined"
+                    required
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Maximum Budget"
-                  type="number"
-                  name="budget.max"
-                  value={formData.budget.max}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                />
-              </Grid>
+              )}
             </Grid>
           </motion.div>
         );
@@ -265,19 +610,114 @@ const OnboardingProfile = () => {
               Lifestyle Preferences
             </Typography>
             <Grid container spacing={3}>
+              {/* Cleanliness Level */}
+              <Grid item xs={12}>
+                <Box sx={{ mb: 3 }}>
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                    <FaBroom size={20} color="#666" />
+                    <Typography variant="subtitle1">Cleanliness Level</Typography>
+                  </Stack>
+                  <Slider
+                    value={formData.preferences.lifestyle.cleanliness}
+                    onChange={handleSliderChange('cleanliness')}
+                    min={1}
+                    max={10}
+                    marks
+                    valueLabelDisplay="auto"
+                    sx={{
+                      '& .MuiSlider-thumb': {
+                        width: 24,
+                        height: 24,
+                      },
+                      '& .MuiSlider-track': {
+                        height: 8,
+                      },
+                      '& .MuiSlider-rail': {
+                        height: 8,
+                      },
+                    }}
+                  />
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    {formData.preferences.lifestyle.cleanliness === 1 ? 'Very Relaxed' :
+                     formData.preferences.lifestyle.cleanliness === 10 ? 'Very Clean' :
+                     'Moderate'}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Social Level */}
+              <Grid item xs={12}>
+                <Box sx={{ mb: 3 }}>
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                    <FaUsers size={20} color="#666" />
+                    <Typography variant="subtitle1">Social Level</Typography>
+                  </Stack>
+                  <Slider
+                    value={formData.preferences.lifestyle.socialLevel}
+                    onChange={handleSliderChange('socialLevel')}
+                    min={1}
+                    max={10}
+                    marks
+                    valueLabelDisplay="auto"
+                    sx={{
+                      '& .MuiSlider-thumb': {
+                        width: 24,
+                        height: 24,
+                      },
+                      '& .MuiSlider-track': {
+                        height: 8,
+                      },
+                      '& .MuiSlider-rail': {
+                        height: 8,
+                      },
+                    }}
+                  />
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    {formData.preferences.lifestyle.socialLevel === 1 ? 'Very Private' :
+                     formData.preferences.lifestyle.socialLevel === 10 ? 'Very Social' :
+                     'Moderate'}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Work Mode */}
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                    {formData.preferences.lifestyle.workMode === 'wfh' ? (
+                      <FaLaptop size={20} color="#666" />
+                    ) : formData.preferences.lifestyle.workMode === 'office' ? (
+                      <FaBuilding size={20} color="#666" />
+                    ) : (
+                      <FaUsers size={20} color="#666" />
+                    )}
+                    <Typography variant="subtitle1">Work Mode</Typography>
+                  </Stack>
+                  <Select
+                    name="preferences.lifestyle.workMode"
+                    value={formData.preferences.lifestyle.workMode}
+                    onChange={handleInputChange}
+                    sx={{ mt: 1 }}
+                  >
+                    <MenuItem value="wfh">Work from Home</MenuItem>
+                    <MenuItem value="office">Office Work</MenuItem>
+                    <MenuItem value="hybrid">Hybrid Work</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Other Preferences */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Smoking</InputLabel>
                   <Select
-                    name="lifestyle.smoking"
-                    value={formData.lifestyle.smoking}
+                    name="preferences.lifestyle.smoking"
+                    value={formData.preferences.lifestyle.smoking}
                     onChange={handleInputChange}
                     label="Smoking"
                   >
-                    <MenuItem value="">Select preference</MenuItem>
                     <MenuItem value="yes">Yes</MenuItem>
                     <MenuItem value="no">No</MenuItem>
-                    <MenuItem value="sometimes">Sometimes</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -285,47 +725,29 @@ const OnboardingProfile = () => {
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Pets</InputLabel>
                   <Select
-                    name="lifestyle.pets"
-                    value={formData.lifestyle.pets}
+                    name="preferences.lifestyle.pets"
+                    value={formData.preferences.lifestyle.pets}
                     onChange={handleInputChange}
                     label="Pets"
                   >
-                    <MenuItem value="">Select preference</MenuItem>
                     <MenuItem value="yes">Yes</MenuItem>
                     <MenuItem value="no">No</MenuItem>
-                    <MenuItem value="open">Open to discussion</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Food Preference</InputLabel>
                   <Select
-                    name="lifestyle.foodPreference"
-                    value={formData.lifestyle.foodPreference}
+                    name="preferences.lifestyle.foodPreference"
+                    value={formData.preferences.lifestyle.foodPreference}
                     onChange={handleInputChange}
                     label="Food Preference"
                   >
-                    <MenuItem value="">Select preference</MenuItem>
-                    <MenuItem value="veg">Vegetarian</MenuItem>
-                    <MenuItem value="non-veg">Non-Vegetarian</MenuItem>
+                    <MenuItem value="vegetarian">Vegetarian</MenuItem>
+                    <MenuItem value="non-vegetarian">Non-Vegetarian</MenuItem>
                     <MenuItem value="vegan">Vegan</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel>Cleanliness Preference</InputLabel>
-                  <Select
-                    name="lifestyle.cleanlinessPreference"
-                    value={formData.lifestyle.cleanlinessPreference}
-                    onChange={handleInputChange}
-                    label="Cleanliness Preference"
-                  >
-                    <MenuItem value="">Select preference</MenuItem>
-                    <MenuItem value="very_clean">Very Clean</MenuItem>
-                    <MenuItem value="moderate">Moderate</MenuItem>
-                    <MenuItem value="relaxed">Relaxed</MenuItem>
+                    <MenuItem value="any">Any</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -344,11 +766,11 @@ const OnboardingProfile = () => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant="outlined">
+                <FormControl fullWidth variant="outlined" required>
                   <InputLabel>Preferred Gender</InputLabel>
                   <Select
-                    name="roommatePreferences.gender"
-                    value={formData.roommatePreferences.gender}
+                    name="preferences.roommates.gender"
+                    value={formData.preferences.roommates.gender}
                     onChange={handleInputChange}
                     label="Preferred Gender"
                   >
@@ -365,19 +787,21 @@ const OnboardingProfile = () => {
                     fullWidth
                     label="Min Age"
                     type="number"
-                    name="roommatePreferences.ageRange.min"
-                    value={formData.roommatePreferences.ageRange.min}
+                    name="preferences.roommates.ageRange.min"
+                    value={formData.preferences.roommates.ageRange.min}
                     onChange={handleInputChange}
                     variant="outlined"
+                    required
                   />
                   <TextField
                     fullWidth
                     label="Max Age"
                     type="number"
-                    name="roommatePreferences.ageRange.max"
-                    value={formData.roommatePreferences.ageRange.max}
+                    name="preferences.roommates.ageRange.max"
+                    value={formData.preferences.roommates.ageRange.max}
                     onChange={handleInputChange}
                     variant="outlined"
+                    required
                   />
                 </Box>
               </Grid>
@@ -391,6 +815,16 @@ const OnboardingProfile = () => {
   };
 
   return (
+    <>
+      <UserTypeModal 
+        open={showUserTypeModal} 
+        onSelect={handleUserTypeSelect} 
+      />
+      <LocationMapModal
+        open={showMapModal}
+        onSelect={handleLocationSelect}
+      />
+      
     <Box
       sx={{
         minHeight: '100vh',
@@ -405,9 +839,9 @@ const OnboardingProfile = () => {
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
           <Box sx={{ mb: 4 }}>
             <Stepper activeStep={step - 1} alternativeLabel>
-              {[1, 2, 3, 4].map((s) => (
-                <Step key={s}>
-                  <StepLabel>{`Step ${s}`}</StepLabel>
+                {getSteps().map((label, index) => (
+                  <Step key={index}>
+                    <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
             </Stepper>
@@ -429,7 +863,7 @@ const OnboardingProfile = () => {
               {step < 4 ? (
                 <Button
                   variant="contained"
-                  onClick={() => setStep(step + 1)}
+                    onClick={handleNext}
                   sx={{ ml: 'auto', px: 3, py: 1, borderRadius: '8px' }}
                 >
                   Next
@@ -448,6 +882,7 @@ const OnboardingProfile = () => {
         </Paper>
       </Container>
     </Box>
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import {
   Box,
   Divider,
   IconButton,
+  Alert,
 } from '@mui/material';
 import { Google as GoogleIcon } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,12 +19,14 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login, signup, loginWithGoogle, userProfile } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
       if (isLogin) {
@@ -39,12 +42,16 @@ export default function Auth() {
       }
     } catch (error) {
       console.error(error);
+      setError(error.message);
     }
 
     setLoading(false);
   }
 
   async function handleGoogleSignIn() {
+    setLoading(true);
+    setError('');
+
     try {
       await loginWithGoogle();
       if (userProfile && userProfile.onboarded) {
@@ -54,7 +61,10 @@ export default function Auth() {
       }
     } catch (error) {
       console.error(error);
+      setError(error.message);
     }
+
+    setLoading(false);
   }
 
   return (
@@ -80,6 +90,12 @@ export default function Auth() {
           <Typography variant="h4" align="center" gutterBottom>
             {isLogin ? 'Welcome Back!' : 'Create Account'}
           </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit}>
             <TextField

@@ -130,53 +130,116 @@ router.put('/me', auth, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Directly merge fields from req.body into the user object
-    // This assumes the frontend sends flattened data as per AuthContext.jsx changes
-    Object.assign(user, req.body);
+    // Handle profile updates
+    if (req.body.profile) {
+      // Update basic profile fields
+      if (req.body.profile.age) user.profile.age = parseInt(req.body.profile.age);
+      if (req.body.profile.gender) user.profile.gender = req.body.profile.gender;
+      if (req.body.profile.occupation) user.profile.occupation = req.body.profile.occupation;
+      if (req.body.profile.bio) user.profile.bio = req.body.profile.bio;
+      if (req.body.profile.interests) user.profile.interests = req.body.profile.interests;
+      if (req.body.profile.photos) user.profile.photos = req.body.profile.photos;
 
-    // Special handling for nested objects to ensure deep merge or default values
-    if (req.body.location) {
-      user.location = {
-        ...user.location,
-        ...req.body.location,
-      };
-      // Ensure type and coordinates are set for location if not provided
-      if (!user.location.type) user.location.type = 'Point';
-      if (!user.location.coordinates) user.location.coordinates = [0, 0];
-    }
+      // Handle location
+      if (req.body.profile.location) {
+        user.profile.location = {
+          type: 'Point',
+          coordinates: req.body.profile.location.coordinates || [0, 0],
+          city: req.body.profile.location.city,
+          area: req.body.profile.location.area
+        };
+      }
 
-    if (req.body.preferences) {
-      user.preferences = {
-        ...user.preferences,
-        ...req.body.preferences,
-      };
-      // Deep merge for nested preference objects like budget, lifestyle, roommates
-      if (req.body.preferences.budget) {
-        user.preferences.budget = { ...user.preferences.budget, ...req.body.preferences.budget };
-      }
-      if (req.body.preferences.lifestyle) {
-        user.preferences.lifestyle = { ...user.preferences.lifestyle, ...req.body.preferences.lifestyle };
-      }
-      if (req.body.preferences.roommatePreferences) {
-        user.preferences.roommatePreferences = { ...user.preferences.roommatePreferences, ...req.body.preferences.roommatePreferences };
-        if (req.body.preferences.roommatePreferences.ageRange) {
-          user.preferences.roommatePreferences.ageRange = { ...user.preferences.roommatePreferences.ageRange, ...req.body.preferences.roommatePreferences.ageRange };
+      // Handle preferences
+      if (req.body.profile.preferences) {
+        // Initialize preferences if they don't exist
+        if (!user.profile.preferences) {
+          user.profile.preferences = {
+            budget: { min: 0, max: 0 },
+            roommates: {
+              gender: 'any',
+              ageRange: { min: 18, max: 99 }
+            },
+            lifestyle: {
+              cleanliness: 5,
+              socialLevel: 5,
+              workMode: 'office',
+              smoking: 'no',
+              pets: 'no',
+              foodPreference: 'any'
+            }
+          };
+        }
+
+        // Handle budget preferences
+        if (req.body.profile.preferences.budget) {
+          user.profile.preferences.budget = {
+            min: parseInt(req.body.profile.preferences.budget.min) || 0,
+            max: parseInt(req.body.profile.preferences.budget.max) || 0
+          };
+        }
+
+        // Handle roommate preferences
+        if (req.body.profile.preferences.roommates) {
+          user.profile.preferences.roommates = {
+            gender: req.body.profile.preferences.roommates.gender || 'any',
+            ageRange: {
+              min: parseInt(req.body.profile.preferences.roommates.ageRange?.min) || 18,
+              max: parseInt(req.body.profile.preferences.roommates.ageRange?.max) || 99
+            }
+          };
+        }
+
+        // Handle lifestyle preferences
+        if (req.body.profile.preferences.lifestyle) {
+          const lifestyle = req.body.profile.preferences.lifestyle;
+          
+          // Initialize lifestyle if it doesn't exist
+          if (!user.profile.preferences.lifestyle) {
+            user.profile.preferences.lifestyle = {};
+          }
+
+          user.profile.preferences.lifestyle.cleanliness = lifestyle.cleanliness !== undefined ? parseInt(lifestyle.cleanliness) : user.profile.preferences.lifestyle.cleanliness;
+          user.profile.preferences.lifestyle.socialLevel = lifestyle.socialLevel !== undefined ? parseInt(lifestyle.socialLevel) : user.profile.preferences.lifestyle.socialLevel;
+          user.profile.preferences.lifestyle.workMode = lifestyle.workMode || user.profile.preferences.lifestyle.workMode;
+          user.profile.preferences.lifestyle.smoking = lifestyle.smoking || user.profile.preferences.lifestyle.smoking;
+          user.profile.preferences.lifestyle.pets = lifestyle.pets || user.profile.preferences.lifestyle.pets;
+          user.profile.preferences.lifestyle.foodPreference = lifestyle.foodPreference || user.profile.preferences.lifestyle.foodPreference;
         }
       }
     }
 
-    // Handle photos array - replace if new photos are provided
-    if (req.body.photos) {
-      user.photos = req.body.photos;
+    // Handle top-level user fields
+    if (req.body.name !== undefined) user.name = req.body.name;
+    if (req.body.userType !== undefined) user.userType = req.body.userType;
+    if (req.body.onboarded !== undefined) user.onboarded = req.body.onboarded;
+
+    // Handle room details for room_provider
+    if (req.body.roomDetails) {
+      user.roomDetails.type = req.body.roomDetails.type || '';
+      user.roomDetails.bhkType = req.body.roomDetails.bhkType || '';
+      user.roomDetails.address = req.body.roomDetails.address || '';
+      user.roomDetails.rent = req.body.roomDetails.rent !== undefined ? parseFloat(req.body.roomDetails.rent) : 0;
+      user.roomDetails.availableFrom = req.body.roomDetails.availableFrom ? new Date(req.body.roomDetails.availableFrom) : undefined;
+      user.roomDetails.amenities = req.body.roomDetails.amenities || [];
+      user.roomDetails.photos = req.body.roomDetails.photos || [];
+      user.roomDetails.description = req.body.roomDetails.description || '';
+    } else if (req.body.userType === 'room_provider' && req.body.onboarded === true) {
+      // If room_provider is onboarded but no roomDetails are sent (e.g., skipped), clear roomDetails
+      user.roomDetails = {
+        type: '',
+        bhkType: '',
+        address: '',
+        rent: 0,
+        availableFrom: undefined,
+        amenities: [],
+        photos: [],
+        description: ''
+      };
     }
 
     await user.save();
-    console.log('Profile updated successfully:', {
-      id: user._id,
-      firebaseUid: user.firebaseUid,
-      profile: user
-    });
-    
+    console.log('User profile updated successfully:', user.firebaseUid);
     res.json(user);
   } catch (error) {
     console.error('Error updating profile:', error);

@@ -112,10 +112,57 @@ export const AuthProvider = ({ children }) => {
   const signup = async (email, password) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Removed logic to fetch and set user profile here, as it will be handled by onAuthStateChanged
-      setCurrentUser(userCredential.user);
-      return userCredential.user;
+      const user = userCredential.user;
+
+      // Immediately create a basic profile in MongoDB after Firebase registration
+      const basicProfile = {
+        firebaseUid: user.uid,
+        email: user.email,
+        name: user.displayName || user.email?.split('@')[0] || 'New User',
+        photos: [user.photoURL || ''],
+        location: {
+          city: '',
+          area: ''
+        },
+        preferences: {
+          budget: {
+            min: 0,
+            max: 0
+          },
+          lifestyle: {
+            cleanliness: 5, // Default values as per schema
+            socialLevel: 5,
+            workMode: 'office',
+            smoking: 'no',
+            pets: 'no',
+            foodPreference: 'any'
+          }
+        },
+        onboarded: false // Explicitly set to false for initial creation
+      };
+
+      const token = await user.getIdToken();
+      const createResponse = await fetch(`${API_BASE_URL}/api/profiles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(basicProfile)
+      });
+
+      if (!createResponse.ok) {
+        console.error('Error creating basic profile in MongoDB:', await createResponse.text());
+        // Optionally, sign out the Firebase user if MongoDB profile creation fails
+        await signOut(auth);
+        throw new Error('Failed to create basic profile');
+      }
+      const createdProfile = await createResponse.json();
+      setUserProfile(createdProfile);
+      setCurrentUser(user);
+      return user;
     } catch (error) {
+      console.error('Signup process error:', error);
       throw error;
     }
   };
@@ -123,9 +170,31 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      const user = userCredential.user;
+      
+      // Check if user has a profile in MongoDB
+      const token = await user.getIdToken();
+      const response = await fetch(`${API_BASE_URL}/api/profiles/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        // If user doesn't have a profile, sign them out
+        await signOut(auth);
+        throw new Error('Please register first to create your profile');
+      }
+      
+      return user;
     } catch (error) {
-      throw error;
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        throw new Error('Invalid email or password');
+      } else if (error.message === 'Please register first to create your profile') {
+        throw error;
+      } else {
+        throw new Error('Failed to log in. Please try again.');
+      }
     }
   };
 
@@ -136,17 +205,24 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       const token = await currentUser.getIdToken();
+      // Ensure onboarded is set to true when updating profile
+      const updatedProfileData = {
+        ...profileData,
+        onboarded: true
+      };
+      
       const response = await fetch(`${API_BASE_URL}/api/profiles/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(updatedProfileData)
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
       }
 
       const updatedProfile = await response.json();
