@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 const UserTypeContext = createContext();
 
@@ -11,11 +12,25 @@ export const useUserType = () => {
 };
 
 export const UserTypeProvider = ({ children }) => {
+  const { userProfile } = useAuth();
   const [userType, setUserType] = useState(null);
+
+  // Update userType when userProfile changes
+  useEffect(() => {
+    if (userProfile) {
+      setUserType(userProfile.userType || null);
+    } else {
+      setUserType(null);
+    }
+  }, [userProfile]);
+
+  const updateUserType = (newType) => {
+    setUserType(newType);
+  };
 
   const value = {
     userType,
-    setUserType,
+    setUserType: updateUserType,
   };
 
   return (

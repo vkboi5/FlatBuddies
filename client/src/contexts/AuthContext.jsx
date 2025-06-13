@@ -36,74 +36,82 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [userChoice, setUserChoice] = useState(null);
+
+  const fetchUserProfile = async (user) => {
+    if (!user) return;
+    setProfileLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/profiles/me`, {
+        headers: {
+          Authorization: `Bearer ${await user.getIdToken()}`
+        }
+      });
+      
+      if (response.ok) {
+        const profile = await response.json();
+        setUserProfile(profile);
+      } else if (response.status === 404) {
+        // Create basic profile if it doesn't exist
+        const basicProfile = {
+          firebaseUid: user.uid,
+          email: user.email,
+          name: user.displayName || user.email?.split('@')[0] || 'New User',
+          photos: [user.photoURL || ''],
+          location: {
+            city: '',
+            area: ''
+          },
+          preferences: {
+            budget: {
+              min: 0,
+              max: 0
+            },
+            lifestyle: {
+              cleanliness: 5,
+              socialLevel: 5,
+              workMode: 'office',
+              smoking: 'no',
+              pets: 'no',
+              foodPreference: 'any'
+            }
+          }
+        };
+        
+        const createResponse = await fetch(`${API_BASE_URL}/api/profiles`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${await user.getIdToken()}`
+          },
+          body: JSON.stringify(basicProfile)
+        });
+
+        if (createResponse.ok) {
+          const createdProfile = await createResponse.json();
+          setUserProfile(createdProfile);
+        } else {
+          console.error('Error creating basic profile:', await createResponse.text());
+          throw new Error('Failed to create basic profile');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching/creating profile:', error);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
-        try {
-          // Get user profile from MongoDB
-          const response = await fetch(`${API_BASE_URL}/api/profiles/me`, {
-            headers: {
-              Authorization: `Bearer ${await user.getIdToken()}`
-            }
-          });
-          
-          if (response.ok) {
-            const profile = await response.json();
-            setUserProfile(profile);
-          } else if (response.status === 404) {
-            // Create basic profile if it doesn't exist
-            const basicProfile = {
-              firebaseUid: user.uid,
-              email: user.email,
-              name: user.displayName || user.email?.split('@')[0] || 'New User',
-              photos: [user.photoURL || ''],
-              location: {
-                city: '',
-                area: ''
-              },
-              preferences: {
-                budget: {
-                  min: 0,
-                  max: 0
-                },
-                lifestyle: {
-                  smoking: '',
-                  pets: '',
-                  foodPreference: '',
-                  cleanlinessPreference: ''
-                }
-              }
-            };
-            
-            const createResponse = await fetch(`${API_BASE_URL}/api/profiles`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${await user.getIdToken()}`
-              },
-              body: JSON.stringify(basicProfile)
-            });
-
-            if (createResponse.ok) {
-                const createdProfile = await createResponse.json();
-                setUserProfile(createdProfile);
-            } else {
-                console.error('Error creating basic profile:', await createResponse.text());
-                throw new Error('Failed to create basic profile');
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching/creating profile:', error);
-        } finally {
-          setLoading(false);
-        }
+        await fetchUserProfile(user);
       } else {
         setUserProfile(null);
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return unsubscribe;
@@ -342,6 +350,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     userProfile,
     loading,
+    profileLoading,
     userChoice,
     setUserChoice,
     signup,
@@ -352,6 +361,8 @@ export const AuthProvider = ({ children }) => {
     dislikeProfile,
     postListing,
     updateUserType,
+    fetchUserProfile,
+    setUserProfile
   };
 
   return (

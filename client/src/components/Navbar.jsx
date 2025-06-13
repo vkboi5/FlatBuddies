@@ -28,8 +28,10 @@ import {
   Login as LoginIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
+import { toast } from 'react-hot-toast';
 
 export default function Navbar() {
   const [anchorElUser, setAnchorElUser] = useState(null);
@@ -37,7 +39,8 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const { currentUser, logout, userProfile } = useAuth();
+  const location = useLocation();
+  const { currentUser, logout, userProfile, setUserProfile, fetchUserProfile } = useAuth();
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -45,6 +48,29 @@ export default function Navbar() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleProfileClick = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handleCloseUserMenu();
+
+    // If we're already on the profile page, don't navigate
+    if (location.pathname === '/profile') {
+      return;
+    }
+
+    try {
+      // Ensure we have the latest profile data
+      if (currentUser) {
+        await fetchUserProfile(currentUser);
+        // Only navigate after we have the profile data
+        navigate('/profile', { replace: true });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast.error('Error loading profile');
+    }
   };
 
   const handleLogout = async () => {
@@ -65,7 +91,7 @@ export default function Navbar() {
   ];
 
   const userMenuItems = [
-    { text: 'Profile', icon: <PersonIcon />, action: () => navigate('/profile') },
+    { text: 'Profile', icon: <PersonIcon />, action: handleProfileClick },
     { text: 'Logout', icon: <LogoutIcon />, action: handleLogout },
   ];
 
@@ -156,7 +182,7 @@ export default function Navbar() {
           </Typography>
 
           {/* Desktop Navigation */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
             {navItems.map((item) => (
               <Button
                 key={item.text}

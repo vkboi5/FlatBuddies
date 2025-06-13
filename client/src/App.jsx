@@ -37,8 +37,22 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/onboarding/profile" element={<OnboardingProfile />} />
-              <Route path="/explore" element={<Explore />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route
+                path="/explore"
+                element={
+                  <ProtectedRoute>
+                    <Explore />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/dashboard"
                 element={
@@ -55,7 +69,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/matches" element={<Matches />} />
+              <Route
+                path="/matches"
+                element={
+                  <ProtectedRoute>
+                    <Matches />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Router>
         </UserTypeProvider>

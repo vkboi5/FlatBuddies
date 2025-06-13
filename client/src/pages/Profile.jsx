@@ -14,43 +14,143 @@ import {
   Slider,
   Stack,
   Divider,
+  Grid,
+  Chip,
+  Avatar,
+  Autocomplete,
+  OutlinedInput,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { FaBroom, FaUsers, FaLaptop, FaBuilding } from 'react-icons/fa';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import LocationMapModal from '../components/LocationMapModal';
+import UserTypeModal from '../components/UserTypeModal';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { initializeApp } from 'firebase/app';
+import { createFilterOptions } from '@mui/material/Autocomplete';
+import { useNavigate } from 'react-router-dom';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAP3ruMIUK4A8AHo-I1AaRG6BFXv8gwXxQ",
+  authDomain: "flatbuddies-e6e7b.firebaseapp.com",
+  projectId: "flatbuddies-e6e7b",
+  storageBucket: "flatbuddies-e6e7b.appspot.com",
+  messagingSenderId: "643218990933",
+  appId: "1:643218990933:web:5195d4928a69cd834231dc"
+};
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+const interestsOptions = [
+  'Reading', 'Writing', 'Music', 'Movies', 'Gaming', 'Sports', 'Fitness', 'Hiking', 'Camping',
+  'Cooking', 'Baking', 'Gardening', 'Photography', 'Painting', 'Drawing', 'Crafts', 'Fashion',
+  'Travel', 'Languages', 'Volunteering', 'Technology', 'Science', 'History', 'Politics',
+  'Animals', 'Cars', 'Motorcycles', 'Dancing', 'Yoga', 'Meditation', 'Cycling', 'Swimming',
+  'Running', 'Fishing', 'Hunting', 'Collecting', 'Board Games', 'Puzzles'
+];
+
+const filterOptions = createFilterOptions();
 
 export default function Profile() {
-  const { currentUser, userProfile, updateProfile, updateUserType } = useAuth();
+  const { currentUser, userProfile, updateProfile, updateUserType, profileLoading } = useAuth();
   const [form, setForm] = useState(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [showUserTypeChangeModal, setShowUserTypeChangeModal] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (userProfile) {
-      // Initialize form with existing userProfile data, including userType and lifestyle preferences
+    if (userProfile && !profileLoading) {
       setForm({
         name: userProfile.name || '',
-        dob: userProfile.profile?.age ? new Date(new Date().getFullYear() - userProfile.profile.age, 0, 1).toISOString().split('T')[0] : '',
+        age: userProfile.profile?.age || 0,
         gender: userProfile.profile?.gender || '',
-        location: userProfile.profile?.location?.city || '',
+        occupation: userProfile.profile?.occupation || '',
         bio: userProfile.profile?.bio || '',
+        photos: userProfile.profile?.photos || [],
+        interests: userProfile.profile?.interests || [],
+        location: {
+          type: userProfile.profile?.location?.type || 'Point',
+          coordinates: userProfile.profile?.location?.coordinates || [0, 0],
+          city: userProfile.profile?.location?.city || '',
+          area: userProfile.profile?.location?.area || '',
+        },
         userType: userProfile.userType || 'room_seeker',
         preferences: {
+          budget: {
+            min: userProfile.profile?.preferences?.budget?.min || 0,
+            max: userProfile.profile?.preferences?.budget?.max || 0,
+          },
+          roommates: {
+            gender: userProfile.profile?.preferences?.roommates?.gender || '',
+            ageRange: {
+              min: userProfile.profile?.preferences?.roommates?.ageRange?.min || 0,
+              max: userProfile.profile?.preferences?.roommates?.ageRange?.max || 0,
+            }
+          },
           lifestyle: {
             cleanliness: userProfile.profile?.preferences?.lifestyle?.cleanliness || 5,
             socialLevel: userProfile.profile?.preferences?.lifestyle?.socialLevel || 5,
             workMode: userProfile.profile?.preferences?.lifestyle?.workMode || 'office',
+            smoking: userProfile.profile?.preferences?.lifestyle?.smoking || 'no',
+            pets: userProfile.profile?.preferences?.lifestyle?.pets || 'no',
+            foodPreference: userProfile.profile?.preferences?.lifestyle?.foodPreference || 'any',
           }
         }
       });
+      if (userProfile.profile?.photos && userProfile.profile.photos.length > 0) {
+        setPhotoPreview(userProfile.profile.photos[0]);
+      }
+      setInitialLoad(false);
     }
-  }, [userProfile]);
+  }, [userProfile, profileLoading]);
+
+  if (initialLoad || profileLoading) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 6 }}>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <CircularProgress />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Loading profile...
+          </Typography>
+        </Paper>
+      </Container>
+    );
+  }
+
+  if (!currentUser || !userProfile) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 6 }}>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="error" gutterBottom>
+            Profile not found
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate('/')}
+            sx={{ mt: 2 }}
+          >
+            Return to Home
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
 
   if (!form) {
     return (
       <Container maxWidth="sm" sx={{ py: 6 }}>
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <CircularProgress />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Preparing your profile...
+          </Typography>
         </Paper>
       </Container>
     );
@@ -58,17 +158,59 @@ export default function Profile() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const processedValue = e.target.type === 'number' && value === '' ? 0 : value;
+
     if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setForm(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
+      const [parent, child, grandChild] = name.split('.');
+      if (parent === 'location' && (child === 'city' || child === 'area')) {
+        return;
+      }
+      if (grandChild) {
+        setForm(prev => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: {
+              ...prev[parent][child],
+              [grandChild]: processedValue
+            }
+          }
+        }));
+      } else {
+        setForm(prev => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: processedValue
+          }
+        }));
+      }
     } else {
-      setForm(prev => ({ ...prev, [name]: value }));
+      setForm(prev => ({ ...prev, [name]: processedValue }));
+    }
+  };
+
+  const handleLocationSelect = (selectedLocation) => {
+    setForm(prev => ({
+      ...prev,
+      location: {
+        ...prev.location,
+        city: selectedLocation.city,
+        area: selectedLocation.area,
+        coordinates: selectedLocation.coordinates,
+      }
+    }));
+    setShowMapModal(false);
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    } else {
+      setPhotoFile(null);
+      setPhotoPreview(null);
     }
   };
 
@@ -92,27 +234,59 @@ export default function Profile() {
         throw new Error("User not authenticated or profile not loaded.");
       }
 
-      // Prepare profile data to send to backend
+      let photoUrl = '';
+      if (photoFile) {
+        const storageRef = ref(storage, `profile_photos/${currentUser.uid}/${photoFile.name}`);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        photoUrl = await getDownloadURL(snapshot.ref);
+        toast.success('Personal photo uploaded!');
+      } else if (photoPreview) {
+        photoUrl = form.photos[0] || '';
+      }
+
       const profileData = {
         name: form.name,
+        userType: form.userType,
+        onboarded: true,
         profile: {
-          age: form.dob ? new Date().getFullYear() - new Date(form.dob).getFullYear() : undefined,
+          age: parseInt(form.age),
           gender: form.gender,
-          location: {
-            city: form.location,
-            area: '', // Assuming area is not edited here
-          },
+          occupation: form.occupation,
           bio: form.bio,
+          photos: photoUrl ? [photoUrl] : [],
+          interests: form.interests,
+          location: {
+            type: form.location.type,
+            coordinates: form.location.coordinates,
+            city: form.location.city,
+            area: form.location.area,
+          },
           preferences: {
-            lifestyle: form.preferences.lifestyle
+            budget: {
+              min: parseInt(form.preferences.budget.min),
+              max: parseInt(form.preferences.budget.max),
+            },
+            roommates: {
+              gender: form.preferences.roommates.gender,
+              ageRange: {
+                min: parseInt(form.preferences.roommates.ageRange.min),
+                max: parseInt(form.preferences.roommates.ageRange.max),
+              }
+            },
+            lifestyle: {
+              cleanliness: form.preferences.lifestyle.cleanliness,
+              socialLevel: form.preferences.lifestyle.socialLevel,
+              workMode: form.preferences.lifestyle.workMode,
+              smoking: form.preferences.lifestyle.smoking,
+              pets: form.preferences.lifestyle.pets,
+              foodPreference: form.preferences.lifestyle.foodPreference,
+            }
           }
         },
       };
 
-      // Update the main profile fields
       await updateProfile(profileData);
 
-      // Update user type separately if it changed
       if (form.userType !== userProfile.userType) {
         await updateUserType(form.userType);
       }
@@ -127,12 +301,42 @@ export default function Profile() {
     }
   };
 
+  const handleUserTypeChange = async (selectedUserType) => {
+    setSaving(true);
+    try {
+      await updateUserType(selectedUserType);
+      setForm(prev => ({
+        ...prev,
+        userType: selectedUserType,
+      }));
+      toast.success('User type updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update user type.');
+      console.error('Error updating user type:', error);
+    } finally {
+      setSaving(false);
+      setShowUserTypeChangeModal(false);
+    }
+  };
+
   return (
     <Container maxWidth="sm" sx={{ py: 6 }}>
       <Paper sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          My Profile
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" gutterBottom>
+            My Profile
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary" sx={{ ml: 2 }}>
+            ({form.userType === 'room_seeker' ? 'Looking for a room' : 'Looking for a roommate'})
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={() => setShowUserTypeChangeModal(true)}
+            sx={{ ml: 'auto' }}
+          >
+            Change User Type
+          </Button>
+        </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <TextField
             label="Full Name"
@@ -143,14 +347,21 @@ export default function Profile() {
             required
           />
           <TextField
-            label="Date of Birth"
-            type="date"
-            name="dob"
-            value={form.dob}
+            label="Age"
+            type="number"
+            name="age"
+            value={form.age}
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
             disabled={!editing}
             required
+          />
+          <TextField
+            label="Occupation"
+            name="occupation"
+            value={form.occupation}
+            onChange={handleChange}
+            disabled={!editing}
+            variant="outlined"
           />
           <FormControl fullWidth required disabled={!editing}>
             <InputLabel>Gender</InputLabel>
@@ -165,27 +376,50 @@ export default function Profile() {
               <MenuItem value="other">Other</MenuItem>
             </Select>
           </FormControl>
-          <FormControl fullWidth required disabled={!editing}>
-            <InputLabel>Location</InputLabel>
+          <TextField
+            fullWidth
+            label="Location"
+            value={form.location.city ? `${form.location.city}${form.location.area ? ', ' + form.location.area : ''}` : ''}
+            onClick={() => editing && setShowMapModal(true)}
+            onFocus={(e) => e.target.blur()}
+            readOnly
+            variant="outlined"
+            required
+            disabled={!editing}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+          <FormControl fullWidth disabled={!editing}>
+            <InputLabel id="interests-label">Interests</InputLabel>
             <Select
-              name="location"
-              value={form.location}
-              label="Location"
+              labelId="interests-label"
+              multiple
+              name="interests"
+              value={form.interests}
               onChange={handleChange}
+              input={<OutlinedInput id="select-multiple-chip" label="Interests" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
             >
-              <MenuItem value="Nagpur">Nagpur</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth required disabled={!editing}>
-            <InputLabel>Looking For</InputLabel>
-            <Select
-              name="userType"
-              value={form.userType}
-              label="Looking For"
-              onChange={handleChange}
-            >
-              <MenuItem value="room_seeker">Flats</MenuItem>
-              <MenuItem value="room_provider">Flatmates</MenuItem>
+              {interestsOptions.map((interest) => (
+                <MenuItem
+                  key={interest}
+                  value={interest}
+                  style={{
+                    fontWeight: form.interests.indexOf(interest) === -1
+                      ? 'normal'
+                      : 'bold',
+                  }}
+                >
+                  {interest}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <TextField
@@ -198,14 +432,49 @@ export default function Profile() {
             disabled={!editing}
           />
 
-          {/* Lifestyle Preferences Section */}
+          <Box>
+            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+              Personal Photo
+            </Typography>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              style={{ display: 'none' }}
+              id="personal-photo-upload"
+              disabled={!editing}
+            />
+            <label htmlFor="personal-photo-upload">
+              <Button variant="outlined" component="span" startIcon={<AddAPhotoIcon />} disabled={!editing}>
+                Upload Photo
+              </Button>
+            </label>
+            {photoPreview && (
+              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                <Avatar src={photoPreview} sx={{ width: 80, height: 80, mr: 2 }} />
+                {editing && (
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={() => {
+                      setPhotoFile(null);
+                      setPhotoPreview(null);
+                      setForm(prev => ({ ...prev, photos: [] }));
+                    }}
+                  >
+                    Remove Photo
+                  </Button>
+                )}
+              </Box>
+            )}
+          </Box>
+
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
               Lifestyle Preferences
             </Typography>
             <Divider sx={{ mb: 3 }} />
             
-            {/* Cleanliness Level */}
             <Box sx={{ mb: 3 }}>
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                 <FaBroom size={20} color="#666" />
@@ -239,7 +508,6 @@ export default function Profile() {
               </Typography>
             </Box>
 
-            {/* Social Level */}
             <Box sx={{ mb: 3 }}>
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                 <FaUsers size={20} color="#666" />
@@ -273,8 +541,7 @@ export default function Profile() {
               </Typography>
             </Box>
 
-            {/* Work Mode */}
-            <FormControl fullWidth disabled={!editing}>
+            <FormControl fullWidth disabled={!editing} sx={{ mb: 3 }}>
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                 {form.preferences.lifestyle.workMode === 'wfh' ? (
                   <FaLaptop size={20} color="#666" />
@@ -296,7 +563,143 @@ export default function Profile() {
                 <MenuItem value="hybrid">Hybrid Work</MenuItem>
               </Select>
             </FormControl>
+
+            <FormControl fullWidth variant="outlined" disabled={!editing} sx={{ mb: 3 }}>
+              <InputLabel>Smoking</InputLabel>
+              <Select
+                name="preferences.lifestyle.smoking"
+                value={form.preferences.lifestyle.smoking}
+                onChange={handleChange}
+                label="Smoking"
+              >
+                <MenuItem value="yes">Yes</MenuItem>
+                <MenuItem value="no">No</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth variant="outlined" disabled={!editing} sx={{ mb: 3 }}>
+              <InputLabel>Pets</InputLabel>
+              <Select
+                name="preferences.lifestyle.pets"
+                value={form.preferences.lifestyle.pets}
+                onChange={handleChange}
+                label="Pets"
+              >
+                <MenuItem value="yes">Yes</MenuItem>
+                <MenuItem value="no">No</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth variant="outlined" disabled={!editing} sx={{ mb: 3 }}>
+              <InputLabel>Food Preference</InputLabel>
+              <Select
+                name="preferences.lifestyle.foodPreference"
+                value={form.preferences.lifestyle.foodPreference}
+                onChange={handleChange}
+                label="Food Preference"
+              >
+                <MenuItem value="vegetarian">Vegetarian</MenuItem>
+                <MenuItem value="non-vegetarian">Non-Vegetarian</MenuItem>
+                <MenuItem value="vegan">Vegan</MenuItem>
+                <MenuItem value="any">Any</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
+
+          {form.userType === 'room_seeker' && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Budget & Roommate Preferences
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Typography gutterBottom>Budget Range (₹)</Typography>
+                  <Slider
+                    value={[form.preferences.budget.min, form.preferences.budget.max]}
+                    onChange={(e, newValue) => setForm(prev => ({
+                      ...prev,
+                      preferences: {
+                        ...prev.preferences,
+                        budget: {
+                          min: newValue[0],
+                          max: newValue[1]
+                        }
+                      }
+                    }))}
+                    valueLabelDisplay="auto"
+                    min={1000}
+                    max={100000}
+                    step={1000}
+                    disableSwap
+                    disabled={!editing}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth variant="outlined" required disabled={!editing}>
+                    <InputLabel>Preferred Gender</InputLabel>
+                    <Select
+                      name="preferences.roommates.gender"
+                      value={form.preferences.roommates.gender}
+                      onChange={handleChange}
+                      label="Preferred Gender"
+                    >
+                      <MenuItem value="">Select preference</MenuItem>
+                      <MenuItem value="male">Male</MenuItem>
+                      <MenuItem value="female">Female</MenuItem>
+                      <MenuItem value="any">Any</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" gap={2}>
+                    <TextField
+                      fullWidth
+                      label="Min Age"
+                      type="number"
+                      name="preferences.roommates.ageRange.min"
+                      value={form.preferences.roommates.ageRange.min}
+                      onChange={handleChange}
+                      variant="outlined"
+                      required
+                      disabled={!editing}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Max Age"
+                      type="number"
+                      name="preferences.roommates.ageRange.max"
+                      value={form.preferences.roommates.ageRange.max}
+                      onChange={handleChange}
+                      variant="outlined"
+                      required
+                      disabled={!editing}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          {form.userType === 'room_provider' && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Property Details
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Rent Amount"
+                  type="number"
+                  name="preferences.budget.min"
+                  value={form.preferences.budget.min}
+                  onChange={handleChange}
+                  variant="outlined"
+                  required
+                  disabled={!editing}
+                />
+              </Grid>
+            </Box>
+          )}
 
           {editing ? (
             <Button variant="contained" onClick={handleSave} disabled={saving} startIcon={saving ? <CircularProgress size={20} color="inherit" /> : null}>
@@ -309,6 +712,16 @@ export default function Profile() {
           )}
         </Box>
       </Paper>
+      <LocationMapModal
+        open={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        onSelectLocation={handleLocationSelect}
+        initialLocation={form.location}
+      />
+      <UserTypeModal
+        open={showUserTypeChangeModal}
+        onSelect={handleUserTypeChange}
+      />
     </Container>
   );
 } 

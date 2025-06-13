@@ -43,10 +43,10 @@ const UserTypeModal = ({ open, onSelect }) => {
       }}
     >
       <DialogTitle align="center" sx={{ pb: 2 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" component="span" gutterBottom>
           What Are You Looking For?
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle1" component="span" color="text.secondary">
           Choose whether you're looking for a flat or a roommate
         </Typography>
       </DialogTitle>

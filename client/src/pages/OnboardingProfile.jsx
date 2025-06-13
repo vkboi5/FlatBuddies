@@ -54,7 +54,7 @@ const interestsOptions = [
   'Cooking', 'Baking', 'Gardening', 'Photography', 'Painting', 'Drawing', 'Crafts', 'Fashion',
   'Travel', 'Languages', 'Volunteering', 'Technology', 'Science', 'History', 'Politics',
   'Animals', 'Cars', 'Motorcycles', 'Dancing', 'Yoga', 'Meditation', 'Cycling', 'Swimming',
-  'Running', 'Fishing', 'Hunting', 'Collecting', 'Board Games', 'Puzzles', 'Cars', 'Motorcycles'
+  'Running', 'Fishing', 'Hunting', 'Collecting', 'Board Games', 'Puzzles'
 ];
 
 const sampleLocations = [
@@ -81,7 +81,7 @@ const OnboardingProfile = () => {
   const [showMapModal, setShowMapModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    age: '',
+    age: 0,
     gender: '',
     occupation: '',
     bio: '',
@@ -95,14 +95,14 @@ const OnboardingProfile = () => {
     },
     preferences: {
     budget: {
-      min: '',
-      max: ''
+      min: 0,
+      max: 0
     },
       roommates: {
       gender: '',
       ageRange: {
-        min: '',
-        max: ''
+        min: 0,
+        max: 0
         }
       },
       lifestyle: {
@@ -128,7 +128,7 @@ const OnboardingProfile = () => {
           ...prev,
           name: userProfile.name || '',
           userType: userProfile.userType || '',
-          age: userProfile.profile?.age || '',
+          age: userProfile.profile?.age || 0,
           gender: userProfile.profile?.gender || '',
           occupation: userProfile.profile?.occupation || '',
           bio: userProfile.profile?.bio || '',
@@ -141,14 +141,14 @@ const OnboardingProfile = () => {
           },
           preferences: {
             budget: {
-              min: userProfile.profile?.preferences?.budget?.min || '',
-              max: userProfile.profile?.preferences?.budget?.max || ''
+              min: userProfile.profile?.preferences?.budget?.min || 0,
+              max: userProfile.profile?.preferences?.budget?.max || 0
             },
             roommates: {
               gender: userProfile.profile?.preferences?.roommates?.gender || '',
               ageRange: {
-                min: userProfile.profile?.preferences?.roommates?.ageRange?.min || '',
-                max: userProfile.profile?.preferences?.roommates?.ageRange?.max || ''
+                min: userProfile.profile?.preferences?.roommates?.ageRange?.min || 0,
+                max: userProfile.profile?.preferences?.roommates?.ageRange?.max || 0
               }
             },
             lifestyle: {
@@ -252,9 +252,12 @@ const OnboardingProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    // Convert empty string to 0 for number inputs, otherwise keep value as is
+    const processedValue = e.target.type === 'number' && value === '' ? 0 : value;
+
     if (name.includes('.')) {
       const [parent, child, grandChild] = name.split('.');
-      if (parent === 'location' && child === 'city' || parent === 'location' && child === 'area') {
+      if (parent === 'location' && (child === 'city' || child === 'area')) {
         return;
       }
       if (grandChild) {
@@ -264,7 +267,7 @@ const OnboardingProfile = () => {
             ...prev[parent],
             [child]: {
               ...prev[parent][child],
-              [grandChild]: value
+              [grandChild]: processedValue
             }
           }
         }));
@@ -273,7 +276,7 @@ const OnboardingProfile = () => {
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
+          [child]: processedValue
         }
       }));
       }
@@ -281,7 +284,7 @@ const OnboardingProfile = () => {
       // Handle top-level fields
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: processedValue
       }));
     }
   };
@@ -385,6 +388,10 @@ const OnboardingProfile = () => {
         }
       }
     }));
+  };
+
+  const handleCloseMapModal = () => {
+    setShowMapModal(false);
   };
 
   const renderStep = () => {
@@ -822,7 +829,8 @@ const OnboardingProfile = () => {
       />
       <LocationMapModal
         open={showMapModal}
-        onSelect={handleLocationSelect}
+        onSelectLocation={handleLocationSelect}
+        onClose={handleCloseMapModal}
       />
       
     <Box
