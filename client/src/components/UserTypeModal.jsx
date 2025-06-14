@@ -17,16 +17,16 @@ import { motion } from 'framer-motion';
 const UserTypeModal = ({ open, onSelect }) => {
   const choices = [
     {
-      value: 'room_provider',
-      label: 'Flatmate',
-      description: 'I have a flat, looking for a roommate',
-      icon: <GroupIcon sx={{ fontSize: 48, color: 'primary.main' }} />,
-    },
-    {
       value: 'room_seeker',
       label: 'Flats',
       description: 'I need a place to stay',
       icon: <HomeIcon sx={{ fontSize: 48, color: 'primary.main' }} />,
+    },
+    {
+      value: 'room_provider',
+      label: 'Flatmate',
+      description: 'I have a flat, looking for a roommate',
+      icon: <GroupIcon sx={{ fontSize: 48, color: 'primary.main' }} />,
     },
   ];
 

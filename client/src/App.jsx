@@ -13,6 +13,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { UserTypeProvider } from './contexts/UserTypeContext';
 import Navbar from './components/Navbar';
 import Matches from './pages/Matches';
+import ProfileDetail from './pages/ProfileDetail';
 
 const theme = createTheme({
   palette: {
@@ -42,6 +43,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Explore />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/:id"
+                element={
+                  <ProtectedRoute>
+                    <ProfileDetail />
                   </ProtectedRoute>
                 }
               />

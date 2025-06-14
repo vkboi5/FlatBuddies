@@ -25,6 +25,7 @@ import {
   Chip,
   Avatar,
   Autocomplete,
+  InputAdornment,
 } from '@mui/material';
 import {
   FaUser, FaHome, FaHeart, FaSmoking, FaPaw, FaUtensils, FaBroom, FaUsers, FaLaptop, FaBuilding,
@@ -37,6 +38,7 @@ import { useUserType } from '../contexts/UserTypeContext';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import LocationMapModal from '../components/LocationMapModal';
+import CloseIcon from '@mui/icons-material/Close';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAP3ruMIUK4A8AHo-I1AaRG6BFXv8gwXxQ",
@@ -94,15 +96,15 @@ const OnboardingProfile = () => {
       area: '',
     },
     preferences: {
-    budget: {
-      min: 0,
-      max: 0
-    },
-      roommates: {
-      gender: '',
-      ageRange: {
+      budget: {
         min: 0,
         max: 0
+      },
+      roommates: {
+        gender: '',
+        ageRange: {
+          min: 0,
+          max: 0
         }
       },
       lifestyle: {
@@ -112,7 +114,41 @@ const OnboardingProfile = () => {
         smoking: 'no',
         pets: 'no',
         foodPreference: 'any'
+      },
+      desiredRentMin: 0,
+      desiredRentMax: 0,
+      desiredPropertyType: '',
+      desiredBhkType: '',
+      desiredMoveInDate: '',
+      desiredFurnishingStatus: '',
+      desiredAmenities: [],
+      lookingFor: {
+        roomType: '',
+        sharingPreference: '',
+        moveInDate: '',
+        stayDuration: '',
+        budgetRange: {
+          min: 0,
+          max: 0
+        },
+        desiredLocation: {
+          city: '',
+          area: '',
+          coordinates: [0, 0]
+        },
+        desiredBhkType: '',
       }
+    },
+    property: {
+      hasProperty: false,
+      rent: '',
+      propertyType: '',
+      bhkType: '',
+      availableFrom: '',
+      furnishingStatus: '',
+      amenities: [],
+      description: '',
+      images: [],
     }
   });
 
@@ -158,6 +194,29 @@ const OnboardingProfile = () => {
               smoking: userProfile.profile?.preferences?.lifestyle?.smoking || 'no',
               pets: userProfile.profile?.preferences?.lifestyle?.pets || 'no',
               foodPreference: userProfile.profile?.preferences?.lifestyle?.foodPreference || 'any'
+            },
+            desiredRentMin: userProfile.profile?.preferences?.desiredRentMin || 0,
+            desiredRentMax: userProfile.profile?.preferences?.desiredRentMax || 0,
+            desiredPropertyType: userProfile.profile?.preferences?.desiredPropertyType || '',
+            desiredBhkType: userProfile.profile?.preferences?.desiredBhkType || '',
+            desiredMoveInDate: userProfile.profile?.preferences?.desiredMoveInDate || '',
+            desiredFurnishingStatus: userProfile.profile?.preferences?.desiredFurnishingStatus || '',
+            desiredAmenities: userProfile.profile?.preferences?.desiredAmenities || [],
+            lookingFor: {
+              roomType: userProfile.profile?.preferences?.lookingFor?.roomType || '',
+              sharingPreference: userProfile.profile?.preferences?.lookingFor?.sharingPreference || '',
+              moveInDate: userProfile.profile?.preferences?.lookingFor?.moveInDate || '',
+              stayDuration: userProfile.profile?.preferences?.lookingFor?.stayDuration || '',
+              budgetRange: {
+                min: userProfile.profile?.preferences?.lookingFor?.budgetRange?.min || 0,
+                max: userProfile.profile?.preferences?.lookingFor?.budgetRange?.max || 0
+              },
+              desiredLocation: {
+                city: userProfile.profile?.preferences?.lookingFor?.desiredLocation?.city || '',
+                area: userProfile.profile?.preferences?.lookingFor?.desiredLocation?.area || '',
+                coordinates: userProfile.profile?.preferences?.lookingFor?.desiredLocation?.coordinates || [0, 0]
+              },
+              desiredBhkType: userProfile.profile?.preferences?.lookingFor?.desiredBhkType || '',
             }
           }
         }));
@@ -170,11 +229,16 @@ const OnboardingProfile = () => {
   }, [loading, currentUser, userProfile, navigate, setUserType]);
 
   const handleUserTypeSelect = (type) => {
+    // Set the user type directly from the modal selection
     setUserType(type);
     setShowUserTypeModal(false);
     setFormData(prev => ({
       ...prev,
-      userType: type
+      userType: type,
+      property: {
+        ...prev.property,
+        hasProperty: type === 'room_provider' // Set hasProperty based on the initial selection
+      }
     }));
   };
 
@@ -202,9 +266,35 @@ const OnboardingProfile = () => {
         return formData.name && formData.age && formData.gender && formData.location.city;
       case 2:
         if (userType === 'room_seeker') {
-          return formData.preferences.budget.min && formData.preferences.budget.max;
+          if (formData.property.hasProperty) {
+            return formData.property.location?.city &&
+                   formData.property.rent > 0 &&
+                   formData.property.propertyType &&
+                   formData.property.bhkType &&
+                   formData.property.availableFrom &&
+                   formData.property.furnishingStatus &&
+                   formData.property.description;
+          } else {
+            return formData.preferences.lookingFor.roomType &&
+                   formData.preferences.lookingFor.sharingPreference &&
+                   formData.preferences.lookingFor.moveInDate &&
+                   formData.preferences.lookingFor.stayDuration &&
+                   formData.preferences.lookingFor.budgetRange.min > 0 &&
+                   formData.preferences.lookingFor.budgetRange.max > 0 &&
+                   formData.preferences.lookingFor.desiredLocation.city &&
+                   formData.preferences.lookingFor.desiredBhkType;
+          }
         } else {
-          return formData.preferences.budget.min;
+          if (formData.property.hasProperty) {
+            return formData.property.rent > 0 &&
+                   formData.property.propertyType &&
+                   formData.property.bhkType &&
+                   formData.property.availableFrom &&
+                   formData.property.furnishingStatus &&
+                   formData.property.description;
+          } else {
+            return formData.preferences.budget.min > 0 && formData.preferences.budget.max > 0;
+          }
         }
       case 3:
         return true; // Always return true for step 3 as we set default values
@@ -217,7 +307,8 @@ const OnboardingProfile = () => {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = (actionType) => {
+    console.log('handleNext called with actionType:', actionType);
     // Set default values for lifestyle preferences if not set
     if (step === 2) {
       setFormData(prev => ({
@@ -236,7 +327,18 @@ const OnboardingProfile = () => {
       }));
     }
 
-    if (validateStep(step)) {
+    let isValid = true;
+
+    if (actionType === 'skip' || actionType === 'listRoomLater') {
+      isValid = true; // Bypass validation for skip/list room later
+      console.log('Bypassing validation for skip/listRoomLater. isValid:', isValid);
+    } else {
+      // For 'next' action or other steps, use the comprehensive validateStep
+      isValid = validateStep(step);
+      console.log('Performing validation. isValid:', isValid);
+    }
+
+    if (isValid) {
       console.log('Moving from step', step, 'to step', step + 1);
       setTimeout(() => {
         setStep(prevStep => {
@@ -290,15 +392,47 @@ const OnboardingProfile = () => {
   };
 
   const handleLocationSelect = (selectedLocation) => {
-    setFormData(prev => ({
-      ...prev,
-      location: {
-        ...prev.location,
-        city: selectedLocation.city,
-        area: selectedLocation.area,
-        coordinates: selectedLocation.coordinates,
-      }
-    }));
+    if (step === 2 && userType === 'room_seeker' && formData.property.hasProperty) {
+      // Update property location
+      setFormData(prev => ({
+        ...prev,
+        property: {
+          ...prev.property,
+          location: {
+            city: selectedLocation.city,
+            area: selectedLocation.area,
+            coordinates: selectedLocation.coordinates,
+          }
+        }
+      }));
+    } else if (step === 2 && userType === 'room_seeker') {
+      // Update desired location in preferences
+      setFormData(prev => ({
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          lookingFor: {
+            ...prev.preferences.lookingFor,
+            desiredLocation: {
+              city: selectedLocation.city,
+              area: selectedLocation.area,
+              coordinates: selectedLocation.coordinates,
+            }
+          }
+        }
+      }));
+    } else {
+      // Update main location
+      setFormData(prev => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          city: selectedLocation.city,
+          area: selectedLocation.area,
+          coordinates: selectedLocation.coordinates,
+        }
+      }));
+    }
     setShowMapModal(false);
   };
 
@@ -328,7 +462,7 @@ const OnboardingProfile = () => {
 
       const profileData = {
         name: formData.name,
-        userType: userType,
+        userType: userType, // This will be either 'room_provider' or 'room_seeker'
         onboarded: true,
         profile: {
           age: parseInt(formData.age),
@@ -362,10 +496,49 @@ const OnboardingProfile = () => {
               smoking: formData.preferences.lifestyle.smoking || 'no',
               pets: formData.preferences.lifestyle.pets || 'no',
               foodPreference: formData.preferences.lifestyle.foodPreference || 'any'
+            },
+            desiredRentMin: parseInt(formData.preferences.desiredRentMin),
+            desiredRentMax: parseInt(formData.preferences.desiredRentMax),
+            desiredPropertyType: formData.preferences.desiredPropertyType,
+            desiredBhkType: formData.preferences.desiredBhkType,
+            desiredMoveInDate: formData.preferences.desiredMoveInDate,
+            desiredFurnishingStatus: formData.preferences.desiredFurnishingStatus,
+            desiredAmenities: formData.preferences.desiredAmenities,
+            lookingFor: {
+              roomType: formData.preferences.lookingFor.roomType,
+              sharingPreference: formData.preferences.lookingFor.sharingPreference,
+              moveInDate: formData.preferences.lookingFor.moveInDate,
+              stayDuration: formData.preferences.lookingFor.stayDuration,
+              budgetRange: {
+                min: parseInt(formData.preferences.lookingFor.budgetRange.min),
+                max: parseInt(formData.preferences.lookingFor.budgetRange.max)
+              },
+              desiredLocation: {
+                city: formData.preferences.lookingFor.desiredLocation.city,
+                area: formData.preferences.lookingFor.desiredLocation.area,
+                coordinates: formData.preferences.lookingFor.desiredLocation.coordinates
+              },
+              desiredBhkType: formData.preferences.lookingFor.desiredBhkType,
             }
           }
         }
       };
+
+      // Add property details if user is a room provider
+      if (userType === 'room_provider') {
+        profileData.profile.property = {
+          hasProperty: true,
+          rent: formData.property.rent,
+          propertyType: formData.property.propertyType,
+          bhkType: formData.property.bhkType,
+          availableFrom: formData.property.availableFrom,
+          furnishingStatus: formData.property.furnishingStatus,
+          amenities: formData.property.amenities,
+          description: formData.property.description,
+          images: formData.property.images,
+          location: formData.property.location
+        };
+      }
 
       console.log('Submitting profile data:', profileData);
       await updateProfile(profileData);
@@ -408,7 +581,7 @@ const OnboardingProfile = () => {
               Basic Information
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <TextField
                   fullWidth
                   label="Name"
@@ -419,19 +592,21 @@ const OnboardingProfile = () => {
                   required
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <TextField
                   fullWidth
                   label="Age"
-                  type="number"
                   name="age"
                   value={formData.age}
                   onChange={handleInputChange}
                   variant="outlined"
+                  InputProps={{
+                    inputProps: { min: 0, max: 100 }
+                  }}
                   required
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined" required>
                   <InputLabel>Gender</InputLabel>
                   <Select
@@ -447,7 +622,7 @@ const OnboardingProfile = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <TextField
                   fullWidth
                   label="Occupation"
@@ -457,7 +632,7 @@ const OnboardingProfile = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <TextField
                   fullWidth
                   label="Bio"
@@ -469,7 +644,7 @@ const OnboardingProfile = () => {
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <TextField
                   fullWidth
                   label="Location"
@@ -484,7 +659,7 @@ const OnboardingProfile = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="interests-label">Interests</InputLabel>
                   <Select
@@ -518,7 +693,7 @@ const OnboardingProfile = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
                   Personal Photo
                 </Typography>
@@ -562,46 +737,654 @@ const OnboardingProfile = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 3 }}>
-              {userType === 'room_seeker' ? 'Location & Budget' : 'Location & Property Details'}
+              Location & Property Details
             </Typography>
             <Grid container spacing={3}>
               {userType === 'room_seeker' ? (
                 <>
                   <Grid item xs={12}>
-                    <Typography gutterBottom>Budget Range (₹)</Typography>
-                    <Slider
-                      value={[formData.preferences.budget.min, formData.preferences.budget.max]}
-                      onChange={(e, newValue) => setFormData(prev => ({
-                        ...prev,
-                        preferences: {
-                          ...prev.preferences,
-                          budget: {
-                            min: newValue[0],
-                            max: newValue[1]
+                    <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 1 }}>
+                      Do you have a room to share?
+                    </Typography>
+                    <FormControl fullWidth required>
+                      <Select
+                        value={formData.property.hasProperty ? 'yes' : 'no'}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          property: {
+                            ...prev.property,
+                            hasProperty: e.target.value === 'yes'
                           }
-                        }
-                      }))}
-                      valueLabelDisplay="auto"
-                      min={1000}
-                      max={100000}
-                      step={1000}
-                      disableSwap
-                />
-              </Grid>
+                        }))}
+                      >
+                        <MenuItem value="yes">Yes, I have a room</MenuItem>
+                        <MenuItem value="no">No, I'm looking for a room</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {formData.property.hasProperty ? (
+                    <>
+                      <Grid item xs={12}>
+                        <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 1 }}>
+                          Property Details
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sx={{ mb: 3 }}>
+                        <TextField
+                          fullWidth
+                          label="Location"
+                          value={formData.property.location?.city ? `${formData.property.location.city}${formData.property.location.area ? ', ' + formData.property.location.area : ''}` : ''}
+                          onClick={() => setShowMapModal(true)}
+                          onFocus={(e) => e.target.blur()}
+                          readOnly
+                          variant="outlined"
+                          required
+                          InputProps={{
+                            readOnly: true,
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label="Rent per month"
+                          value={formData.property.rent}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            property: {
+                              ...prev.property,
+                              rent: e.target.value
+                            }
+                          }))}
+                          InputProps={{
+                            startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                          }}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>Property Type</InputLabel>
+                          <Select
+                            value={formData.property.propertyType}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                propertyType: e.target.value
+                              }
+                            }))}
+                            label="Property Type"
+                          >
+                            <MenuItem value="apartment">Apartment</MenuItem>
+                            <MenuItem value="house">House</MenuItem>
+                            <MenuItem value="villa">Villa</MenuItem>
+                            <MenuItem value="pg">PG</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>BHK Type</InputLabel>
+                          <Select
+                            value={formData.property.bhkType}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                bhkType: e.target.value
+                              }
+                            }))}
+                            label="BHK Type"
+                          >
+                            <MenuItem value="1RK">1 RK</MenuItem>
+                            <MenuItem value="1BHK">1 BHK</MenuItem>
+                            <MenuItem value="2BHK">2 BHK</MenuItem>
+                            <MenuItem value="3BHK">3 BHK</MenuItem>
+                            <MenuItem value="4BHK">4 BHK</MenuItem>
+                            <MenuItem value="4+BHK">4+ BHK</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>Furnishing Status</InputLabel>
+                          <Select
+                            value={formData.property.furnishingStatus}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                furnishingStatus: e.target.value
+                              }
+                            }))}
+                            label="Furnishing Status"
+                          >
+                            <MenuItem value="furnished">Furnished</MenuItem>
+                            <MenuItem value="semi-furnished">Semi-Furnished</MenuItem>
+                            <MenuItem value="unfurnished">Unfurnished</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          type="date"
+                          label="Available From"
+                          value={formData.property.availableFrom}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            property: {
+                              ...prev.property,
+                              availableFrom: e.target.value
+                            }
+                          }))}
+                          InputLabelProps={{ shrink: true }}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" gutterBottom>
+                          Amenities
+                        </Typography>
+                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                          {[
+                            'WiFi', 'Parking', 'Power Backup', 'Lift', 'Security',
+                            'Gym', 'Swimming Pool', 'Garden', 'Balcony', 'AC',
+                            'TV', 'Washing Machine', 'Refrigerator', 'Geyser',
+                            'Gas Connection', 'Housekeeping'
+                          ].map((amenity) => (
+                            <Chip
+                              key={amenity}
+                              label={amenity}
+                              onClick={() => {
+                                const currentAmenities = formData.property.amenities || [];
+                                const newAmenities = currentAmenities.includes(amenity)
+                                  ? currentAmenities.filter(a => a !== amenity)
+                                  : [...currentAmenities, amenity];
+                                setFormData(prev => ({
+                                  ...prev,
+                                  property: {
+                                    ...prev.property,
+                                    amenities: newAmenities
+                                  }
+                                }));
+                              }}
+                              color={formData.property.amenities?.includes(amenity) ? "primary" : "default"}
+                              sx={{ m: 0.5 }}
+                            />
+                          ))}
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Property Description"
+                          multiline
+                          rows={4}
+                          value={formData.property.description}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            property: {
+                              ...prev.property,
+                              description: e.target.value
+                            }
+                          }))}
+                          placeholder="Describe your property, nearby landmarks, and any other important details..."
+                        />
+                      </Grid>
+                    </>
+                  ) : (
+                    <>
+                      <Grid item xs={12}>
+                        <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 1 }}>
+                          Looking For
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sx={{ mb: 3 }}>
+                        <TextField
+                          fullWidth
+                          label="Desired Location"
+                          value={formData.preferences.lookingFor.desiredLocation.city ? `${formData.preferences.lookingFor.desiredLocation.city}${formData.preferences.lookingFor.desiredLocation.area ? ', ' + formData.preferences.lookingFor.desiredLocation.area : ''}` : ''}
+                          onClick={() => setShowMapModal(true)}
+                          onFocus={(e) => e.target.blur()}
+                          readOnly
+                          variant="outlined"
+                          required
+                          InputProps={{
+                            readOnly: true,
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>Room Type</InputLabel>
+                          <Select
+                            value={formData.preferences.lookingFor.roomType}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              preferences: {
+                                ...prev.preferences,
+                                lookingFor: {
+                                  ...prev.preferences.lookingFor,
+                                  roomType: e.target.value
+                                }
+                              }
+                            }))}
+                            label="Room Type"
+                          >
+                            <MenuItem value="">Select Room Type</MenuItem>
+                            <MenuItem value="single">Single Room</MenuItem>
+                            <MenuItem value="double">Double Sharing</MenuItem>
+                            <MenuItem value="triple">Triple Sharing</MenuItem>
+                            <MenuItem value="any">Any</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>BHK Type</InputLabel>
+                          <Select
+                            value={formData.preferences.lookingFor.desiredBhkType}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              preferences: {
+                                ...prev.preferences,
+                                lookingFor: {
+                                  ...prev.preferences.lookingFor,
+                                  desiredBhkType: e.target.value
+                                }
+                              }
+                            }))}
+                            label="BHK Type"
+                          >
+                            <MenuItem value="">Select BHK Type</MenuItem>
+                            <MenuItem value="1RK">1 RK</MenuItem>
+                            <MenuItem value="1BHK">1 BHK</MenuItem>
+                            <MenuItem value="2BHK">2 BHK</MenuItem>
+                            <MenuItem value="3BHK">3 BHK</MenuItem>
+                            <MenuItem value="4BHK">4 BHK</MenuItem>
+                            <MenuItem value="4+BHK">4+ BHK</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>Sharing Preference</InputLabel>
+                          <Select
+                            value={formData.preferences.lookingFor.sharingPreference}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              preferences: {
+                                ...prev.preferences,
+                                lookingFor: {
+                                  ...prev.preferences.lookingFor,
+                                  sharingPreference: e.target.value
+                                }
+                              }
+                            }))}
+                            label="Sharing Preference"
+                          >
+                            <MenuItem value="">Select Sharing Preference</MenuItem>
+                            <MenuItem value="male">Male Only</MenuItem>
+                            <MenuItem value="female">Female Only</MenuItem>
+                            <MenuItem value="any">Any</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          type="date"
+                          label="Desired Move-in Date"
+                          value={formData.preferences.lookingFor.moveInDate}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            preferences: {
+                              ...prev.preferences,
+                              lookingFor: {
+                                ...prev.preferences.lookingFor,
+                                moveInDate: e.target.value
+                              }
+                            }
+                          }))}
+                          InputLabelProps={{ shrink: true }}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth required>
+                          <InputLabel>Stay Duration</InputLabel>
+                          <Select
+                            value={formData.preferences.lookingFor.stayDuration}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              preferences: {
+                                ...prev.preferences,
+                                lookingFor: {
+                                  ...prev.preferences.lookingFor,
+                                  stayDuration: e.target.value
+                                }
+                              }
+                            }))}
+                            label="Stay Duration"
+                          >
+                            <MenuItem value="">Select Stay Duration</MenuItem>
+                            <MenuItem value="1-3">1-3 months</MenuItem>
+                            <MenuItem value="3-6">3-6 months</MenuItem>
+                            <MenuItem value="6-12">6-12 months</MenuItem>
+                            <MenuItem value="12+">12+ months</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" gutterBottom>Desired Property Budget Range (per month)</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              type="number"
+                              label="Minimum"
+                              value={formData.preferences.lookingFor.budgetRange.min}
+                              onChange={(e) => setFormData(prev => ({
+                                ...prev,
+                                preferences: {
+                                  ...prev.preferences,
+                                  lookingFor: {
+                                    ...prev.preferences.lookingFor,
+                                    budgetRange: {
+                                      ...prev.preferences.lookingFor.budgetRange,
+                                      min: e.target.value
+                                    }
+                                  }
+                                }
+                              }))}
+                              InputProps={{
+                                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                              }}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              type="number"
+                              label="Maximum"
+                              value={formData.preferences.lookingFor.budgetRange.max}
+                              onChange={(e) => setFormData(prev => ({
+                                ...prev,
+                                preferences: {
+                                  ...prev.preferences,
+                                  lookingFor: {
+                                    ...prev.preferences.lookingFor,
+                                    budgetRange: {
+                                      ...prev.preferences.lookingFor.budgetRange,
+                                      max: e.target.value
+                                    }
+                                  }
+                                }
+                              }))}
+                              InputProps={{
+                                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                              }}
+                              required
+                            />
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </>
+                  )}
                 </>
               ) : (
-                <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                    label="Rent Amount"
-                  type="number"
-                    name="preferences.budget.min"
-                    value={formData.preferences.budget.min}
-                  onChange={handleInputChange}
-                  variant="outlined"
-                    required
-                />
-              </Grid>
+                <>
+                  <Grid item xs={12} sx={{ mb: 3 }}>
+                    <FormControl fullWidth>
+                      <InputLabel>Do you have a room/flat?</InputLabel>
+                      <Select
+                        value={formData.property.hasProperty}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          property: {
+                            ...prev.property,
+                            hasProperty: e.target.value
+                          }
+                        }))}
+                        label="Do you have a room/flat?"
+                      >
+                        <MenuItem value={true}>Yes</MenuItem>
+                        <MenuItem value={false}>No</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {formData.property.hasProperty && (
+                    <>
+                      <Grid item xs={12} md={6} sx={{ mb: 3 }}>
+                        <TextField
+                          fullWidth
+                          label="Rent Amount (₹)"
+                          type="number"
+                          value={formData.property.rent}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            property: {
+                              ...prev.property,
+                              rent: e.target.value
+                            }
+                          }))}
+                          required
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6} sx={{ mb: 3 }}>
+                        <FormControl fullWidth>
+                          <InputLabel>Property Type</InputLabel>
+                          <Select
+                            value={formData.property.propertyType}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                propertyType: e.target.value
+                              }
+                            }))}
+                            label="Property Type"
+                            required
+                          >
+                            <MenuItem value="apartment">Apartment</MenuItem>
+                            <MenuItem value="house">House</MenuItem>
+                            <MenuItem value="villa">Villa</MenuItem>
+                            <MenuItem value="pg">PG</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} md={6} sx={{ mb: 3 }}>
+                        <FormControl fullWidth>
+                          <InputLabel>BHK Type</InputLabel>
+                          <Select
+                            value={formData.property.bhkType}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                bhkType: e.target.value
+                              }
+                            }))}
+                            label="BHK Type"
+                            required
+                          >
+                            <MenuItem value="1RK">1 RK</MenuItem>
+                            <MenuItem value="1BHK">1 BHK</MenuItem>
+                            <MenuItem value="2BHK">2 BHK</MenuItem>
+                            <MenuItem value="3BHK">3 BHK</MenuItem>
+                            <MenuItem value="4BHK">4 BHK</MenuItem>
+                            <MenuItem value="4+BHK">4+ BHK</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} md={6} sx={{ mb: 3 }}>
+                        <TextField
+                          fullWidth
+                          label="Available From"
+                          type="date"
+                          value={formData.property.availableFrom}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            property: {
+                              ...prev.property,
+                              availableFrom: e.target.value
+                            }
+                          }))}
+                          InputLabelProps={{ shrink: true }}
+                          required
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} md={6} sx={{ mb: 3 }}>
+                        <FormControl fullWidth>
+                          <InputLabel>Furnishing Status</InputLabel>
+                          <Select
+                            value={formData.property.furnishingStatus}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                furnishingStatus: e.target.value
+                              }
+                            }))}
+                            label="Furnishing Status"
+                            required
+                          >
+                            <MenuItem value="furnished">Furnished</MenuItem>
+                            <MenuItem value="semi-furnished">Semi-Furnished</MenuItem>
+                            <MenuItem value="unfurnished">Unfurnished</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} sx={{ mb: 3 }}>
+                        <FormControl fullWidth>
+                          <InputLabel>Amenities</InputLabel>
+                          <Select
+                            multiple
+                            value={formData.property.amenities}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                amenities: e.target.value
+                              }
+                            }))}
+                            label="Amenities"
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {selected.map((value) => (
+                                  <Chip key={value} label={value} />
+                                ))}
+                              </Box>
+                            )}
+                          >
+                            <MenuItem value="parking">Parking</MenuItem>
+                            <MenuItem value="lift">Lift</MenuItem>
+                            <MenuItem value="power_backup">Power Backup</MenuItem>
+                            <MenuItem value="security">Security</MenuItem>
+                            <MenuItem value="gym">Gym</MenuItem>
+                            <MenuItem value="swimming_pool">Swimming Pool</MenuItem>
+                            <MenuItem value="garden">Garden</MenuItem>
+                            <MenuItem value="wifi">WiFi</MenuItem>
+                            <MenuItem value="ac">AC</MenuItem>
+                            <MenuItem value="tv">TV</MenuItem>
+                            <MenuItem value="washing_machine">Washing Machine</MenuItem>
+                            <MenuItem value="refrigerator">Refrigerator</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} sx={{ mb: 3 }}>
+                        <TextField
+                          fullWidth
+                          label="Property Description"
+                          multiline
+                          rows={4}
+                          value={formData.property.description}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            property: {
+                              ...prev.property,
+                              description: e.target.value
+                            }
+                          }))}
+                          required
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} sx={{ mb: 3 }}>
+                        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                          Room Images
+                        </Typography>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files);
+                            setFormData(prev => ({
+                              ...prev,
+                              property: {
+                                ...prev.property,
+                                images: [...prev.property.images, ...files]
+                              }
+                            }));
+                          }}
+                          style={{ display: 'none' }}
+                          id="room-images-upload"
+                        />
+                        <label htmlFor="room-images-upload">
+                          <Button variant="outlined" component="span" startIcon={<AddAPhotoIcon />}>
+                            Upload Room Images
+                          </Button>
+                        </label>
+                        {formData.property.images.length > 0 && (
+                          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                            {formData.property.images.map((image, index) => (
+                              <Box key={index} sx={{ position: 'relative' }}>
+                                <Avatar
+                                  src={URL.createObjectURL(image)}
+                                  sx={{ width: 100, height: 100 }}
+                                />
+                                <IconButton
+                                  size="small"
+                                  sx={{
+                                    position: 'absolute',
+                                    top: -8,
+                                    right: -8,
+                                    bgcolor: 'background.paper',
+                                    '&:hover': { bgcolor: 'background.paper' }
+                                  }}
+                                  onClick={() => {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      property: {
+                                        ...prev.property,
+                                        images: prev.property.images.filter((_, i) => i !== index)
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <CloseIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </Grid>
+                    </>
+                  )}
+                </>
               )}
             </Grid>
           </motion.div>
@@ -618,7 +1401,7 @@ const OnboardingProfile = () => {
             </Typography>
             <Grid container spacing={3}>
               {/* Cleanliness Level */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <Box sx={{ mb: 3 }}>
                   <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                     <FaBroom size={20} color="#666" />
@@ -653,7 +1436,7 @@ const OnboardingProfile = () => {
               </Grid>
 
               {/* Social Level */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <Box sx={{ mb: 3 }}>
                   <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                     <FaUsers size={20} color="#666" />
@@ -688,7 +1471,7 @@ const OnboardingProfile = () => {
               </Grid>
 
               {/* Work Mode */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <FormControl fullWidth>
                   <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                     {formData.preferences.lifestyle.workMode === 'wfh' ? (
@@ -714,7 +1497,7 @@ const OnboardingProfile = () => {
               </Grid>
 
               {/* Other Preferences */}
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Smoking</InputLabel>
                   <Select
@@ -728,7 +1511,7 @@ const OnboardingProfile = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Pets</InputLabel>
                   <Select
@@ -742,7 +1525,7 @@ const OnboardingProfile = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel>Food Preference</InputLabel>
                   <Select
@@ -772,7 +1555,7 @@ const OnboardingProfile = () => {
               Roommate Preferences
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined" required>
                   <InputLabel>Preferred Gender</InputLabel>
                   <Select
@@ -788,7 +1571,7 @@ const OnboardingProfile = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} sx={{ mb: 3 }}>
                 <Box display="flex" gap={2}>
                   <TextField
                     fullWidth
@@ -868,23 +1651,48 @@ const OnboardingProfile = () => {
                   Previous
                 </Button>
               )}
-              {step < 4 ? (
-                <Button
-                  variant="contained"
-                    onClick={handleNext}
-                  sx={{ ml: 'auto', px: 3, py: 1, borderRadius: '8px' }}
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  variant="contained"
-                  sx={{ ml: 'auto', px: 3, py: 1, borderRadius: '8px' }}
-                >
-                  Complete Profile
-                </Button>
-              )}
+              <Box sx={{ display: 'flex', gap: 2, ml: 'auto' }}>
+                {step === 2 && userType !== 'room_seeker' ? (
+                  // Render Skip or List Room Later if on step 2 and user is property owner
+                  formData.property.hasProperty === false ? (
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleNext('skip')}
+                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
+                    >
+                      Skip
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleNext('listRoomLater')}
+                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
+                    >
+                      List Room Later
+                    </Button>
+                  )
+                ) : (
+                  // Render Next or Complete Profile for other steps or room seeker
+                  step < 4 ? (
+                    <Button
+                      variant="contained"
+                      onClick={() => handleNext('next')}
+                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      onClick={() => handleNext('complete')}
+                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
+                    >
+                      Complete Profile
+                    </Button>
+                  )
+                )}
+              </Box>
             </Box>
           </form>
         </Paper>

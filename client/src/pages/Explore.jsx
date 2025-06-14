@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import TinderCard from 'react-tinder-card';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Box,
@@ -66,6 +67,7 @@ const Explore = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState(userChoice === 'room_seeker' ? 'flats' : 'roommates');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProfiles();
@@ -108,34 +110,47 @@ const Explore = () => {
     }
   };
 
+  const handleCardClick = (profile) => {
+    navigate(`/profile/${profile._id}`, { state: { profile } });
+  };
+
   const renderProfileCard = (profile) => {
     if (viewMode === 'roommates') {
       return (
         <Card 
-          sx={{ 
+          onClick={() => handleCardClick(profile)}
+          sx={{
             position: 'relative',
             height: '85vh',
             width: '100%',
             maxWidth: 384,
             mx: 'auto',
-            borderRadius: '1.5rem',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+            borderRadius: '16px',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0px 15px 45px rgba(0, 0, 0, 0.2), 0px 30px 90px rgba(0, 0, 0, 0.18)',
+            transform: 'translateY(0)',
+            transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-12px)',
+              boxShadow: '0px 20px 50px rgba(0, 0, 0, 0.25), 0px 40px 100px rgba(0, 0, 0, 0.2)',
+            },
             overflow: 'hidden',
-            background: 'white',
+            background: '#fdfdfd',
             display: 'flex',
             flexDirection: 'column',
+            cursor: 'pointer',
           }}
         >
           {/* Profile Image with Gradient Overlay */}
           <Box sx={{ position: 'relative', height: '50%', flexShrink: 0 }}>
-          <CardMedia
-            component="img"
+            <CardMedia
+              component="img"
               height="100%"
-            image={profile.profile?.photos?.[0] || 'https://via.placeholder.com/400x500'}
-            alt={profile.name}
+              image={profile.profile?.photos?.[0] || 'https://via.placeholder.com/400x500'}
+              alt={profile.name}
               sx={{ 
                 objectFit: 'cover',
-                filter: 'brightness(0.9)',
+                filter: 'brightness(0.8)',
               }}
             />
             <Box
@@ -144,8 +159,8 @@ const Explore = () => {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: '50%',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
+                height: '60%',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%)',
               }}
             />
             
@@ -156,24 +171,24 @@ const Explore = () => {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                p: 3,
+                p: 4,
                 color: 'white',
               }}
             >
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              <Stack direction="row" spacing={2} alignItems="flex-end" sx={{ mb: 2 }}>
+                <Typography variant="h3" sx={{ fontWeight: 'bold', textShadow: '1px 1px 3px rgba(0,0,0,0.4)' }}>
                   {profile.name}
                 </Typography>
                 {profile.profile?.age && (
-                  <Typography variant="h5" sx={{ fontWeight: 'light' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 'light', textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
                     {profile.profile.age}
                   </Typography>
                 )}
               </Stack>
               
               {profile.profile?.occupation && (
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                  <FaBriefcase size={16} />
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                  <FaBriefcase size={18} />
                   <Typography variant="body1">
                     {profile.profile.occupation}
                   </Typography>
@@ -181,8 +196,8 @@ const Explore = () => {
               )}
               
               {profile.profile?.location?.city && (
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <FaMapMarkerAlt size={16} />
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <FaMapMarkerAlt size={18} />
                   <Typography variant="body1">
                     {profile.profile.location.city}
                     {profile.profile.location.area && `, ${profile.profile.location.area}`}
@@ -192,12 +207,13 @@ const Explore = () => {
             </Box>
           </Box>
 
-          {/* Profile Details Section */}
-          <Box 
-            sx={{ 
+          {/* Scrollable Content Wrapper */}
+          <Box
+            sx={{
               flex: 1,
               overflowY: 'auto',
-              position: 'relative',
+              minHeight: 0, // Crucial for flex item to shrink and allow scrolling
+              backgroundColor: '#fcfcfc',
               '&::-webkit-scrollbar': {
                 width: '4px',
               },
@@ -205,266 +221,158 @@ const Explore = () => {
                 background: '#f1f1f1',
               },
               '&::-webkit-scrollbar-thumb': {
-                background: '#888',
+                background: '#ccc',
                 borderRadius: '4px',
               },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#999',
+              },
+              WebkitOverflowScrolling: 'touch',
+              scrollBehavior: 'smooth',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'thin',
             }}
           >
-            <CardContent sx={{ p: 3, pb: 8 }}>
+            <CardContent sx={{ p: 4, pb: 8 }}>
               {/* Basic Info Section */}
               {(profile.profile?.education || profile.profile?.languages?.length > 0) && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaUser size={16} /> Basic Info
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaUser size={20} /> Basic Info
                   </Typography>
                   <Grid container spacing={2}>
                     {profile.profile?.education && (
-                      <Grid item xs={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Education</Typography>
-                        <Typography variant="body2">{profile.profile.education}</Typography>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>Education</Typography>
+                        <Typography variant="body1" color="text.primary">{profile.profile.education}</Typography>
                       </Grid>
                     )}
                     {profile.profile?.languages?.length > 0 && (
-                      <Grid item xs={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Languages</Typography>
-                        <Typography variant="body2">{profile.profile.languages.join(', ')}</Typography>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>Languages</Typography>
+                        <Typography variant="body1" color="text.primary">{profile.profile.languages.join(', ')}</Typography>
                       </Grid>
                     )}
                   </Grid>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
                 </Box>
               )}
 
               {/* Bio Section */}
               {profile.profile?.bio && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaInfo size={16} /> About
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaInfo size={20} /> About Me
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
                     {profile.profile.bio}
                   </Typography>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
                 </Box>
               )}
 
-              {/* Lifestyle Preferences */}
-              {(profile.profile?.preferences?.lifestyle?.cleanliness || 
-                profile.profile?.preferences?.lifestyle?.socialLevel || 
-                profile.profile?.preferences?.lifestyle?.workMode || 
-                profile.profile?.preferences?.lifestyle?.smoking || 
-                profile.profile?.preferences?.lifestyle?.pets || 
-                profile.profile?.preferences?.lifestyle?.foodPreference) && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaCoffee size={16} /> Lifestyle
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {/* Cleanliness Scale */}
-                    {profile.profile?.preferences?.lifestyle?.cleanliness && (
-                      <Grid item xs={6}>
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(0,0,0,0.03)',
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 1,
-                          }}
-                        >
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <FaBroom size={16} color="#666" />
-                            <Typography variant="subtitle2" color="text.secondary">Cleanliness</Typography>
-                          </Stack>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box
-                              sx={{
-                                width: '100%',
-                                height: 6,
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderRadius: 3,
-                                overflow: 'hidden',
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  width: `${(profile.profile.preferences.lifestyle.cleanliness / 10) * 100}%`,
-                                  height: '100%',
-                                  backgroundColor: '#4caf50',
-                                  borderRadius: 3,
-                                }}
-                              />
-                            </Box>
-                            <Typography variant="body2" sx={{ minWidth: 24, textAlign: 'right' }}>
-                              {profile.profile.preferences.lifestyle.cleanliness}/10
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    )}
-
-                    {/* Social Level Scale */}
-                    {profile.profile?.preferences?.lifestyle?.socialLevel && (
-                      <Grid item xs={6}>
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(0,0,0,0.03)',
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 1,
-                          }}
-                        >
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <FaUsers size={16} color="#666" />
-                            <Typography variant="subtitle2" color="text.secondary">Social Level</Typography>
-                          </Stack>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box
-                              sx={{
-                                width: '100%',
-                                height: 6,
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderRadius: 3,
-                                overflow: 'hidden',
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  width: `${(profile.profile.preferences.lifestyle.socialLevel / 10) * 100}%`,
-                                  height: '100%',
-                                  backgroundColor: '#2196f3',
-                                  borderRadius: 3,
-                                }}
-                              />
-                            </Box>
-                            <Typography variant="body2" sx={{ minWidth: 24, textAlign: 'right' }}>
-                              {profile.profile.preferences.lifestyle.socialLevel}/10
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    )}
-
-                    {/* Work Mode */}
-                    {profile.profile?.preferences?.lifestyle?.workMode && (
-                      <Grid item xs={12}>
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(0,0,0,0.03)',
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 1,
-                          }}
-                        >
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            {profile.profile.preferences.lifestyle.workMode === 'wfh' ? (
-                              <FaLaptop size={16} color="#666" />
-                            ) : profile.profile.preferences.lifestyle.workMode === 'office' ? (
-                              <FaBuilding size={16} color="#666" />
-                            ) : (
-                              <FaUsers size={16} color="#666" />
-                            )}
-                            <Typography variant="subtitle2" color="text.secondary">Work Mode</Typography>
-                          </Stack>
-                          <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
-                            {profile.profile.preferences.lifestyle.workMode === 'wfh' ? 'Work from Home' :
-                             profile.profile.preferences.lifestyle.workMode === 'office' ? 'Office Work' :
-                             'Hybrid Work'}
-            </Typography>
-                        </Box>
-                      </Grid>
-                    )}
-
-                    {/* Other Preferences */}
-                    <Grid item xs={12}>
-                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-              {profile.profile?.preferences?.lifestyle?.smoking && (
-                <Chip
-                            icon={<FaSmoking size={16} />}
-                  label={profile.profile.preferences.lifestyle.smoking === 'yes' ? 'Smoker' : 'Non-smoker'}
-                  size="small"
-                            sx={{ 
-                              backgroundColor: 'rgba(0,0,0,0.05)',
-                              '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                            }}
-                />
-              )}
-              {profile.profile?.preferences?.lifestyle?.pets && (
-                <Chip
-                            icon={<FaDog size={16} />}
-                  label={profile.profile.preferences.lifestyle.pets === 'yes' ? 'Has pets' : 'No pets'}
-                  size="small"
-                            sx={{ 
-                              backgroundColor: 'rgba(0,0,0,0.05)',
-                              '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                            }}
-                />
-              )}
-              {profile.profile?.preferences?.lifestyle?.foodPreference && (
-                <Chip
-                            icon={<FaUtensils size={16} />}
-                  label={profile.profile.preferences.lifestyle.foodPreference}
-                            size="small"
-                            sx={{ 
-                              backgroundColor: 'rgba(0,0,0,0.05)',
-                              '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                            }}
-                          />
-                        )}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
-
-              {/* Interests */}
+              {/* Interests Section */}
               {profile.profile?.interests?.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaMusic size={16} /> Interests
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaHeart size={20} /> Interests
                   </Typography>
-                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                     {profile.profile.interests.map((interest, index) => (
-                <Chip
+                      <Chip
                         key={index}
                         label={interest}
-                  size="small"
-                        sx={{ 
-                          backgroundColor: 'rgba(0,0,0,0.05)',
-                          '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                        }}
+                        sx={{ m: 0.5 }}
                       />
                     ))}
                   </Stack>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
                 </Box>
               )}
 
-              {/* Daily Routine */}
-              {(profile.profile?.routine?.wakeUpTime || profile.profile?.routine?.sleepTime) && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaClock size={16} /> Daily Routine
+              {/* Lifestyle Preferences Section */}
+              {profile.profile?.preferences?.lifestyle && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaUsers size={20} /> Lifestyle Preferences
                   </Typography>
                   <Grid container spacing={2}>
-                    {profile.profile?.routine?.wakeUpTime && (
-                      <Grid item xs={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Wake up time</Typography>
-                        <Typography variant="body2">{profile.profile.routine.wakeUpTime}</Typography>
-                      </Grid>
-                    )}
-                    {profile.profile?.routine?.sleepTime && (
-                      <Grid item xs={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Sleep time</Typography>
-                        <Typography variant="body2">{profile.profile.routine.sleepTime}</Typography>
+                    <Grid item xs={12} sm={6}>
+                      <Paper elevation={1} sx={{ p: 2, borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton size="small"><FaBroom size={20} /></IconButton>
+                        <Typography variant="subtitle2" color="text.secondary">Cleanliness</Typography>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Box sx={{ width: '100px', height: '6px', borderRadius: '3px', bgcolor: '#e0e0e0' }}>
+                            <Box sx={{ width: `${profile.profile.preferences.lifestyle.cleanliness * 10}%`, height: '100%', borderRadius: '3px', bgcolor: 'success.main' }} />
+                          </Box>
+                          <Typography variant="body2" color="text.primary">{profile.profile.preferences.lifestyle.cleanliness}/10</Typography>
+                        </Stack>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper elevation={1} sx={{ p: 2, borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton size="small"><FaUsers size={20} /></IconButton>
+                        <Typography variant="subtitle2" color="text.secondary">Social Level</Typography>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Box sx={{ width: '100px', height: '6px', borderRadius: '3px', bgcolor: '#e0e0e0' }}>
+                            <Box sx={{ width: `${profile.profile.preferences.lifestyle.socialLevel * 10}%`, height: '100%', borderRadius: '3px', bgcolor: 'info.main' }} />
+                          </Box>
+                          <Typography variant="body2" color="text.primary">{profile.profile.preferences.lifestyle.socialLevel}/10</Typography>
+                        </Stack>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper elevation={1} sx={{ p: 2, borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton size="small"><FaLaptop size={20} /></IconButton>
+                        <Typography variant="subtitle2" color="text.secondary">Work Mode</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.lifestyle.workMode}</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper elevation={1} sx={{ p: 2, borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton size="small"><FaSmoking size={20} /></IconButton>
+                        <Typography variant="subtitle2" color="text.secondary">Smoking</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.lifestyle.smoking}</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper elevation={1} sx={{ p: 2, borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton size="small"><FaDog size={20} /></IconButton>
+                        <Typography variant="subtitle2" color="text.secondary">Pets</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.lifestyle.pets}</Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper elevation={1} sx={{ p: 2, borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton size="small"><FaUtensils size={20} /></IconButton>
+                        <Typography variant="subtitle2" color="text.secondary">Food Pref.</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.lifestyle.foodPreference}</Typography>
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+                </Box>
+              )}
+
+              {/* Roommate Preferences Section */}
+              {profile.profile?.preferences?.roommates && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaUserFriends size={20} /> Roommate Preferences
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
+                      <Typography variant="body1">{profile.profile.preferences.roommates.gender}</Typography>
+                    </Grid>
+                    {profile.profile.preferences.roommates.ageRange && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Age Range</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.roommates.ageRange.min} - {profile.profile.preferences.roommates.ageRange.max}</Typography>
                       </Grid>
                     )}
                   </Grid>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
                 </Box>
               )}
             </CardContent>
@@ -477,257 +385,332 @@ const Explore = () => {
               bottom: 0,
               left: 0,
               right: 0,
-              background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 100%)',
-              backdropFilter: 'blur(10px)',
-              borderTop: '1px solid rgba(0,0,0,0.1)',
-              p: 2,
               display: 'flex',
               justifyContent: 'center',
-              gap: 4,
-              zIndex: 1,
+              gap: 2,
+              pb: 3,
+              zIndex: 10, // Ensure buttons are above content
+              background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)',
+              pt: 4,
             }}
           >
             <Box
-              onClick={() => handleSwipe('left', profile._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSwipe('left', profile._id);
+              }}
               sx={{
                 width: 64,
                 height: 64,
                 borderRadius: '50%',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                bgcolor: '#fff',
+                boxShadow: '0px 4px 15px rgba(0,0,0,0.1)',
                 display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'center',
+                alignItems: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: '#ff4b4b',
-                  color: 'white',
-                  transform: 'scale(1.1)',
-                },
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': { transform: 'scale(1.1)' }
               }}
             >
-              <FaTimes size={28} />
+              <FaTimes size={30} color="#f44336" />
             </Box>
-            
             <Box
-              onClick={() => handleSwipe('right', profile._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSwipe('right', profile._id);
+              }}
               sx={{
                 width: 64,
                 height: 64,
                 borderRadius: '50%',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                bgcolor: '#fff',
+                boxShadow: '0px 4px 15px rgba(0,0,0,0.1)',
                 display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'center',
+                alignItems: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: '#4caf50',
-                  color: 'white',
-                  transform: 'scale(1.1)',
-                },
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': { transform: 'scale(1.1)' }
               }}
             >
-              <FaHeart size={28} />
+              <FaHeart size={30} color="#4caf50" />
+            </Box>
+          </Box>
+        </Card>
+      );
+    } else if (viewMode === 'flats') {
+      return (
+        <Card
+          onClick={() => handleCardClick(profile)}
+          sx={{
+            position: 'relative',
+            height: '85vh',
+            width: '100%',
+            maxWidth: 384,
+            mx: 'auto',
+            borderRadius: '16px',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0px 15px 45px rgba(0, 0, 0, 0.2), 0px 30px 90px rgba(0, 0, 0, 0.18)',
+            transform: 'translateY(0)',
+            transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-12px)',
+              boxShadow: '0px 20px 50px rgba(0, 0, 0, 0.25), 0px 40px 100px rgba(0, 0, 0, 0.2)',
+            },
+            overflow: 'hidden',
+            background: '#fdfdfd',
+            display: 'flex',
+            flexDirection: 'column',
+            cursor: 'pointer',
+          }}
+        >
+          {/* Property Image with Gradient Overlay */}
+          <Box sx={{ position: 'relative', height: '50%', flexShrink: 0 }}>
+            <CardMedia
+              component="img"
+              height="100%"
+              image={profile.property?.images?.[0] || 'https://via.placeholder.com/400x500'}
+              alt={profile.name}
+              sx={{ 
+                objectFit: 'cover',
+                filter: 'brightness(0.8)',
+              }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '60%',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%)',
+              }}
+            />
+            
+            {/* Property Info Overlay */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                p: 4,
+                color: 'white',
+              }}
+            >
+              <Typography variant="h3" sx={{ fontWeight: 'bold', textShadow: '1px 1px 3px rgba(0,0,0,0.4)', mb: 1 }}>
+                ₹{profile.property?.rent} / month
+              </Typography>
+              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                <FaBuilding size={18} />
+                <Typography variant="body1">
+                  {profile.property?.propertyType} ({profile.property?.bhkType})
+                </Typography>
+              </Stack>
+              {profile.profile?.location?.city && (
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <FaMapMarkerAlt size={18} />
+                  <Typography variant="body1">
+                    {profile.profile.location.city}
+                    {profile.profile.location.area && `, ${profile.profile.location.area}`}
+                  </Typography>
+                </Stack>
+              )}
+            </Box>
+          </Box>
+
+          {/* Scrollable Content Wrapper for Flat Card */}
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: 'auto',
+              minHeight: 0, // Crucial for flex item to shrink and allow scrolling
+              backgroundColor: '#fcfcfc',
+              '&::-webkit-scrollbar': {
+                width: '4px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#ccc',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#999',
+              },
+              WebkitOverflowScrolling: 'touch',
+              scrollBehavior: 'smooth',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'thin',
+            }}
+          >
+            <CardContent sx={{ p: 4, pb: 8 }}>
+              {/* Description Section */}
+              {profile.property?.description && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaInfo size={20} /> Description
+                  </Typography>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {profile.property.description}
+                  </Typography>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+                </Box>
+              )}
+
+              {/* Property Details Section */}
+              {(profile.property?.furnishingStatus || profile.property?.availableFrom) && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaHome size={20} /> Property Details
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {profile.property?.furnishingStatus && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Furnishing</Typography>
+                        <Typography variant="body1">{profile.property.furnishingStatus}</Typography>
+                      </Grid>
+                    )}
+                    {profile.property?.availableFrom && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Available From</Typography>
+                        <Typography variant="body1">{new Date(profile.property.availableFrom).toLocaleDateString()}</Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+                </Box>
+              )}
+
+              {/* Amenities Section */}
+              {profile.property?.amenities?.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaWifi size={20} /> Amenities
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {profile.property.amenities.map((amenity, index) => (
+                      <Chip
+                        key={index}
+                        label={amenity}
+                        sx={{ m: 0.5 }}
+                      />
+                    ))}
+                  </Stack>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+                </Box>
+              )}
+
+              {/* Preferred Roommate Details for Property Owner */}
+              {profile.userType === 'property_owner' && profile.profile?.preferences && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary' }}>
+                    <FaUserFriends size={20} /> Preferred Roommate
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {profile.profile.preferences.roommates?.gender && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.roommates.gender}</Typography>
+                      </Grid>
+                    )}
+                    {profile.profile.preferences.roommates?.ageRange && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Age Range</Typography>
+                        <Typography variant="body1">{profile.profile.preferences.roommates.ageRange.min} - {profile.profile.preferences.roommates.ageRange.max}</Typography>
+                      </Grid>
+                    )}
+                    {profile.profile.preferences.lifestyle && (
+                      <>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="subtitle2" color="text.secondary">Smoking</Typography>
+                          <Typography variant="body1">{profile.profile.preferences.lifestyle.smoking}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="subtitle2" color="text.secondary">Pets</Typography>
+                          <Typography variant="body1">{profile.profile.preferences.lifestyle.pets}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="subtitle2" color="text.secondary">Food Preference</Typography>
+                          <Typography variant="body1">{profile.profile.preferences.lifestyle.foodPreference}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                  </Grid>
+                  <Divider sx={{ mt: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+                </Box>
+              )}
+            </CardContent>
+          </Box>
+
+          {/* Action Buttons - New Design */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 2,
+              pb: 3,
+              zIndex: 10, // Ensure buttons are above content
+              background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)',
+              pt: 4,
+            }}
+          >
+            <Box
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSwipe('left', profile._id);
+              }}
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                bgcolor: '#fff',
+                boxShadow: '0px 4px 15px rgba(0,0,0,0.1)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}
+            >
+              <FaTimes size={30} color="#f44336" />
+            </Box>
+            <Box
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSwipe('right', profile._id);
+              }}
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                bgcolor: '#fff',
+                boxShadow: '0px 4px 15px rgba(0,0,0,0.1)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}
+            >
+              <FaHeart size={30} color="#4caf50" />
             </Box>
           </Box>
         </Card>
       );
     } else {
       return (
-        <Card 
-          sx={{ 
-            position: 'relative',
-            height: '85vh',
-            width: '100%',
-            maxWidth: 384,
-            mx: 'auto',
-            borderRadius: '1.5rem',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
-            background: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* Room Image with Gradient Overlay */}
-          <Box sx={{ position: 'relative', height: '50%' }}>
-          <CardMedia
-            component="img"
-              height="100%"
-            image={profile.roomDetails?.photos?.[0] || 'https://via.placeholder.com/400x500'}
-            alt={profile.roomDetails?.title}
-              sx={{ 
-                objectFit: 'cover',
-                filter: 'brightness(0.9)',
-              }}
-            />
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '50%',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
-              }}
-            />
-            
-            {/* Room Info Overlay */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                p: 3,
-                color: 'white',
-              }}
-            >
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                {profile.roomDetails?.title}
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-                ₹{profile.roomDetails?.rent}/month
-              </Typography>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <FaMapMarkerAlt size={16} />
-                <Typography variant="body1">
-                  {profile.roomDetails?.address}
-                </Typography>
-              </Stack>
-            </Box>
-          </Box>
-
-          {/* Room Details Section */}
-          <Box sx={{ 
-            flex: 1,
-            overflowY: 'auto',
-            '&::-webkit-scrollbar': {
-              width: '4px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: '#f1f1f1',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#888',
-              borderRadius: '4px',
-            },
-          }}>
-            <CardContent sx={{ p: 3, pb: 8 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Description
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-                {profile.roomDetails?.description}
-              </Typography>
-
-              <Box sx={{ mt: 'auto' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
-                  Features
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-              {profile.roomDetails?.type && (
-                    <Chip
-                      label={profile.roomDetails.type}
-                      size="small"
-                      sx={{ 
-                        backgroundColor: 'rgba(0,0,0,0.05)',
-                        '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                      }}
-                    />
-              )}
-              {profile.roomDetails?.furnishingStatus && (
-                    <Chip
-                      label={profile.roomDetails.furnishingStatus}
-                      size="small"
-                      sx={{ 
-                        backgroundColor: 'rgba(0,0,0,0.05)',
-                        '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                      }}
-                    />
-              )}
-              {profile.roomDetails?.bedrooms && (
-                    <Chip
-                      label={`${profile.roomDetails.bedrooms} Beds`}
-                      size="small"
-                      sx={{ 
-                        backgroundColor: 'rgba(0,0,0,0.05)',
-                        '&:hover': { backgroundColor: 'rgba(0,0,0,0.1)' }
-                      }}
-                    />
-                  )}
-                </Stack>
-              </Box>
-            </CardContent>
-          </Box>
-
-          {/* Action Buttons - New Design */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 100%)',
-              backdropFilter: 'blur(10px)',
-              borderTop: '1px solid rgba(0,0,0,0.1)',
-              p: 2,
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 4,
-              zIndex: 1,
-            }}
-          >
-            <Box
-              onClick={() => handleSwipe('left', profile._id)}
-              sx={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: '#ff4b4b',
-                  color: 'white',
-                  transform: 'scale(1.1)',
-                },
-              }}
-            >
-              <FaTimes size={28} />
-            </Box>
-            
-            <Box
-              onClick={() => handleSwipe('right', profile._id)}
-              sx={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: '#4caf50',
-                  color: 'white',
-                  transform: 'scale(1.1)',
-                },
-              }}
-            >
-              <FaHeart size={28} />
-            </Box>
-          </Box>
-        </Card>
+        <Box>
+          <Typography>No more profiles to display.</Typography>
+        </Box>
       );
     }
   };
