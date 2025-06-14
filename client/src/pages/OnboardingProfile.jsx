@@ -74,6 +74,10 @@ const sampleLocations = [
 
 const filterOptions = createFilterOptions();
 
+const gradientBackground = 'linear-gradient(120deg, #f6f9fc 0%, #eef2f7 100%)';
+const cardGradient = 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8))';
+const primaryGradient = 'linear-gradient(90deg, #2B32B2 0%, #1488CC 100%)';
+
 const OnboardingProfile = () => {
   const navigate = useNavigate();
   const { updateProfile, currentUser, userProfile, loading } = useAuth();
@@ -576,6 +580,8 @@ const OnboardingProfile = () => {
                   onChange={handleInputChange}
                   variant="outlined"
                   required
+                  InputLabelProps={{ shrink: true }}
+                  placeholder="Enter your name"
                 />
               </Grid>
               <Grid item xs={12} md={6} sx={{ mb: 3 }}>
@@ -586,10 +592,10 @@ const OnboardingProfile = () => {
                   value={formData.age}
                   onChange={handleInputChange}
                   variant="outlined"
-                  InputProps={{
-                    inputProps: { min: 0, max: 100 }
-                  }}
+                  InputProps={{ inputProps: { min: 0, max: 100 } }}
                   required
+                  InputLabelProps={{ shrink: true }}
+                  placeholder="Enter your age"
                 />
               </Grid>
               <Grid item xs={12} md={6} sx={{ mb: 3 }}>
@@ -616,6 +622,8 @@ const OnboardingProfile = () => {
                   value={formData.occupation}
                   onChange={handleInputChange}
                   variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                  placeholder="Your occupation"
                 />
               </Grid>
               <Grid item xs={12} sx={{ mb: 3 }}>
@@ -628,6 +636,8 @@ const OnboardingProfile = () => {
                   multiline
                   rows={4}
                   variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                  placeholder="Tell us about yourself"
                 />
               </Grid>
               <Grid item xs={12} sx={{ mb: 3 }}>
@@ -640,29 +650,39 @@ const OnboardingProfile = () => {
                   readOnly
                   variant="outlined"
                   required
-                  InputProps={{
-                    readOnly: true,
-                  }}
+                  InputProps={{ readOnly: true }}
+                  InputLabelProps={{ shrink: true }}
+                  placeholder="Select your location"
                 />
               </Grid>
               <Grid item xs={12} sx={{ mb: 3 }}>
                 <FormControl fullWidth variant="outlined">
-                  <InputLabel id="interests-label">Interests</InputLabel>
+                  <InputLabel id="interests-label" shrink>Interests</InputLabel>
                   <Select
                     labelId="interests-label"
                     multiple
                     name="interests"
                     value={formData.interests}
                     onChange={handleInputChange}
-                    input={<OutlinedInput id="select-multiple-chip" label="Interests" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
-                    )}
+                    input={<OutlinedInput id="select-multiple-chip" label="Interests" InputLabelProps={{ shrink: true }} placeholder="Select your interests" />}
+                    renderValue={(selected) =>
+                      selected.length === 0 ? (
+                        <span style={{ color: '#aaa' }}>Select your interests</span>
+                      ) : (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((value) => (
+                            <Chip key={value} label={value} />
+                          ))}
+                        </Box>
+                      )
+                    }
+                    displayEmpty
+                    label="Interests"
+                    InputLabelProps={{ shrink: true }}
                   >
+                    <MenuItem disabled value="">
+                      <span style={{ color: '#aaa' }}>Select your interests</span>
+                    </MenuItem>
                     {interestsOptions.map((interest) => (
                       <MenuItem
                         key={interest}
@@ -766,9 +786,9 @@ const OnboardingProfile = () => {
                           readOnly
                           variant="outlined"
                           required
-                          InputProps={{
-                            readOnly: true,
-                          }}
+                          InputProps={{ readOnly: true }}
+                          InputLabelProps={{ shrink: true }}
+                          placeholder="Select property location"
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -784,10 +804,10 @@ const OnboardingProfile = () => {
                               rent: e.target.value
                             }
                           }))}
-                          InputProps={{
-                            startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                          }}
+                          InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }}
                           required
+                          InputLabelProps={{ shrink: true }}
+                          placeholder="Monthly rent"
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -869,6 +889,7 @@ const OnboardingProfile = () => {
                           }))}
                           InputLabelProps={{ shrink: true }}
                           required
+                          placeholder="Select date"
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -919,6 +940,7 @@ const OnboardingProfile = () => {
                             }
                           }))}
                           placeholder="Describe your property, nearby landmarks, and any other important details..."
+                          InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
                     </>
@@ -939,9 +961,9 @@ const OnboardingProfile = () => {
                           readOnly
                           variant="outlined"
                           required
-                          InputProps={{
-                            readOnly: true,
-                          }}
+                          InputProps={{ readOnly: true }}
+                          InputLabelProps={{ shrink: true }}
+                          placeholder="Select desired location"
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -1038,6 +1060,7 @@ const OnboardingProfile = () => {
                           }))}
                           InputLabelProps={{ shrink: true }}
                           required
+                          placeholder="Select date"
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -1087,10 +1110,10 @@ const OnboardingProfile = () => {
                                   }
                                 }
                               }))}
-                              InputProps={{
-                                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                              }}
+                              InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }}
                               required
+                              InputLabelProps={{ shrink: true }}
+                              placeholder="Minimum budget"
                             />
                           </Grid>
                           <Grid item xs={6}>
@@ -1112,10 +1135,10 @@ const OnboardingProfile = () => {
                                   }
                                 }
                               }))}
-                              InputProps={{
-                                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                              }}
+                              InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }}
                               required
+                              InputLabelProps={{ shrink: true }}
+                              placeholder="Maximum budget"
                             />
                           </Grid>
                         </Grid>
@@ -1161,6 +1184,8 @@ const OnboardingProfile = () => {
                             }
                           }))}
                           required
+                          InputLabelProps={{ shrink: true }}
+                          placeholder="Monthly rent"
                         />
                       </Grid>
 
@@ -1227,6 +1252,7 @@ const OnboardingProfile = () => {
                           }))}
                           InputLabelProps={{ shrink: true }}
                           required
+                          placeholder="Select date"
                         />
                       </Grid>
 
@@ -1305,6 +1331,8 @@ const OnboardingProfile = () => {
                             }
                           }))}
                           required
+                          InputLabelProps={{ shrink: true }}
+                          placeholder="Describe your property, nearby landmarks, and any other important details..."
                         />
                       </Grid>
 
@@ -1568,6 +1596,8 @@ const OnboardingProfile = () => {
                     onChange={handleInputChange}
                     variant="outlined"
                     required
+                    InputLabelProps={{ shrink: true }}
+                    placeholder="18"
                   />
                   <TextField
                     fullWidth
@@ -1578,6 +1608,8 @@ const OnboardingProfile = () => {
                     onChange={handleInputChange}
                     variant="outlined"
                     required
+                    InputLabelProps={{ shrink: true }}
+                    placeholder="99"
                   />
                 </Box>
               </Grid>
@@ -1602,88 +1634,210 @@ const OnboardingProfile = () => {
         onClose={handleCloseMapModal}
       />
       
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: 'grey.50',
-        py: 6,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-      }}
-    >
-      <Container maxWidth="md">
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          <Box sx={{ mb: 4 }}>
-            <Stepper activeStep={step - 1} alternativeLabel>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: gradientBackground,
+          py: { xs: 3, sm: 6 },
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '40vh',
+            background: primaryGradient,
+            opacity: 0.05,
+            zIndex: 0,
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              p: { xs: 2, sm: 4 }, 
+              borderRadius: 4,
+              background: cardGradient,
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+            }}
+          >
+            <Box sx={{ mb: 6 }}>
+              <Typography 
+                variant="h4" 
+                align="center" 
+                gutterBottom 
+                sx={{ 
+                  fontWeight: 800,
+                  background: primaryGradient,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 3,
+                }}
+              >
+                Complete Your Profile
+              </Typography>
+              <Stepper 
+                activeStep={step - 1} 
+                alternativeLabel
+                sx={{
+                  '& .MuiStepLabel-root .Mui-completed': {
+                    color: 'primary.main',
+                  },
+                  '& .MuiStepLabel-root .Mui-active': {
+                    color: 'primary.main',
+                    fontWeight: 700,
+                  },
+                  '& .MuiStepLabel-label': {
+                    fontWeight: 500,
+                    fontSize: '0.9rem',
+                  },
+                  '& .MuiStepConnector-line': {
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                  },
+                }}
+              >
                 {getSteps().map((label, index) => (
                   <Step key={index}>
                     <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </Box>
-
-          <form onSubmit={handleSubmit}>
-            {renderStep()}
-
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-              {step > 1 && (
-                <Button
-                  variant="outlined"
-                  onClick={() => setStep(step - 1)}
-                  sx={{ px: 3, py: 1, borderRadius: '8px' }}
-                >
-                  Previous
-                </Button>
-              )}
-              <Box sx={{ display: 'flex', gap: 2, ml: 'auto' }}>
-                {step === 2 && userType !== 'room_seeker' ? (
-                  // Render Skip or List Room Later if on step 2 and user is property owner
-                  formData.property.hasProperty === false ? (
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleNext('skip')}
-                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
-                    >
-                      Skip
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleNext('listRoomLater')}
-                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
-                    >
-                      List Room Later
-                    </Button>
-                  )
-                ) : (
-                  // Render Next or Complete Profile for other steps or room seeker
-                  step < 4 ? (
-                    <Button
-                      variant="contained"
-                      onClick={() => handleNext('next')}
-                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
-                    >
-                      Next
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      onClick={() => handleNext('complete')}
-                      sx={{ px: 3, py: 1, borderRadius: '8px' }}
-                    >
-                      Complete Profile
-                    </Button>
-                  )
-                )}
-              </Box>
+                  </Step>
+                ))}
+              </Stepper>
             </Box>
-          </form>
-        </Paper>
-      </Container>
-    </Box>
+
+            <form onSubmit={handleSubmit}>
+              <Box 
+                sx={{ 
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  borderRadius: 3,
+                  p: { xs: 2, sm: 4 },
+                  mb: 4,
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.02)',
+                }}
+              >
+                {renderStep()}
+              </Box>
+
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  gap: 2,
+                  flexWrap: 'wrap',
+                }}
+              >
+                {step > 1 && (
+                  <Button
+                    variant="outlined"
+                    onClick={() => setStep(step - 1)}
+                    sx={{ 
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: '999px',
+                      fontWeight: 600,
+                      borderWidth: 2,
+                      '&:hover': {
+                        borderWidth: 2,
+                        background: 'rgba(0, 0, 0, 0.04)',
+                      },
+                    }}
+                  >
+                    Previous
+                  </Button>
+                )}
+                <Box sx={{ display: 'flex', gap: 2, ml: 'auto' }}>
+                  {step === 2 && userType !== 'room_seeker' ? (
+                    formData.property.hasProperty === false ? (
+                      <Button
+                        variant="outlined"
+                        onClick={() => handleNext('skip')}
+                        sx={{ 
+                          px: 4,
+                          py: 1.5,
+                          borderRadius: '999px',
+                          fontWeight: 600,
+                          borderWidth: 2,
+                          '&:hover': {
+                            borderWidth: 2,
+                            background: 'rgba(0, 0, 0, 0.04)',
+                          },
+                        }}
+                      >
+                        Skip
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        onClick={() => handleNext('listRoomLater')}
+                        sx={{ 
+                          px: 4,
+                          py: 1.5,
+                          borderRadius: '999px',
+                          fontWeight: 600,
+                          borderWidth: 2,
+                          '&:hover': {
+                            borderWidth: 2,
+                            background: 'rgba(0, 0, 0, 0.04)',
+                          },
+                        }}
+                      >
+                        List Room Later
+                      </Button>
+                    )
+                  ) : (
+                    step < 4 ? (
+                      <Button
+                        variant="contained"
+                        onClick={() => handleNext('next')}
+                        sx={{ 
+                          px: 4,
+                          py: 1.5,
+                          borderRadius: '999px',
+                          fontWeight: 600,
+                          background: primaryGradient,
+                          boxShadow: '0 4px 14px 0 rgba(0, 118, 255, 0.39)',
+                          '&:hover': {
+                            background: 'linear-gradient(90deg, #1488CC 0%, #2B32B2 100%)',
+                            boxShadow: '0 6px 20px rgba(0, 118, 255, 0.23)',
+                          },
+                        }}
+                      >
+                        Next
+                      </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        onClick={() => handleNext('complete')}
+                        sx={{ 
+                          px: 4,
+                          py: 1.5,
+                          borderRadius: '999px',
+                          fontWeight: 600,
+                          background: primaryGradient,
+                          boxShadow: '0 4px 14px 0 rgba(0, 118, 255, 0.39)',
+                          '&:hover': {
+                            background: 'linear-gradient(90deg, #1488CC 0%, #2B32B2 100%)',
+                            boxShadow: '0 6px 20px rgba(0, 118, 255, 0.23)',
+                          },
+                        }}
+                      >
+                        Complete Profile
+                      </Button>
+                    )
+                  )}
+                </Box>
+              </Box>
+            </form>
+          </Paper>
+        </Container>
+      </Box>
     </>
   );
 };
