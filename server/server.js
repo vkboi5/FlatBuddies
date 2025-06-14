@@ -3,22 +3,22 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
-const socketIo = require('socket.io');
+const socketService = require('./services/socketService');
 const User = require('./models/User');
 const admin = require('firebase-admin');
 const serviceAccount = require('./flatbuddies-e6e7b-firebase-adminsdk-fbsvc-6041dbb9fe.json');
+const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profiles');
+const messageRoutes = require('./routes/messages');
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
+
+// Initialize Socket.IO
+socketService.initialize(server);
 
 // Middleware
 app.use(cors({
@@ -180,24 +180,15 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/flatmates
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  console.log('New client connected');
-  
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
-});
-
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/profiles', require('./routes/profiles'));
-app.use('/api/matches', require('./routes/matches'));
+app.use('/api/auth', authRoutes);
+app.use('/api/profiles', profileRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
 const PORT = process.env.PORT || 5000;

@@ -14,6 +14,9 @@ import { UserTypeProvider } from './contexts/UserTypeContext';
 import Navbar from './components/Navbar';
 import Matches from './pages/Matches';
 import ProfileDetail from './pages/ProfileDetail';
+import PostListing from './pages/PostListing';
+import Likes from './pages/Likes';
+import Messages from './pages/Messages';
 
 const theme = createTheme({
   palette: {
@@ -83,6 +86,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Matches />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/likes"
+                element={
+                  <ProtectedRoute>
+                    <Likes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/post-listing"
+                element={
+                  <ProtectedRoute>
+                    <PostListing />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoute>
+                    <Messages />
                   </ProtectedRoute>
                 }
               />

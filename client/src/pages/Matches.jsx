@@ -121,7 +121,7 @@ export default function Matches() {
       </Box>
 
       <Grid container spacing={4}>
-        {matches.length > 0 ? (
+          {matches.length > 0 ? (
           matches.map((match, index) => {
             const details = getMatchDetails(match);
             return (
@@ -328,7 +328,7 @@ export default function Matches() {
               </Typography>
             </Box>
           </Grid>
-        )}
+          )}
       </Grid>
     </Container>
   );

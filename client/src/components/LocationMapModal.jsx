@@ -138,11 +138,14 @@ const LocationMapModal = ({ open, onClose, onSelectLocation, initialLocation }) 
       console.log('Extracted city:', city, 'Extracted area:', area);
 
       if (city || area) {
-        onSelectLocation({
+        const locationData = {
           city: city || selectedPlace.name || '',
           area: area || '',
           coordinates: [selectedPlace.geometry.location.lng(), selectedPlace.geometry.location.lat()],
-        });
+          formattedAddress: selectedPlace.formatted_address
+        };
+        console.log('Sending location data:', locationData);
+        onSelectLocation(locationData);
         onClose();
       } else {
         toast.error('Could not extract city or area from the selected location.');

@@ -11,7 +11,6 @@ import {
 } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../config';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAP3ruMIUK4A8AHo-I1AaRG6BFXv8gwXxQ",
@@ -40,64 +39,84 @@ export const AuthProvider = ({ children }) => {
   const [userChoice, setUserChoice] = useState(null);
 
   const fetchUserProfile = async (user) => {
-    if (!user) return;
-    setProfileLoading(true);
     try {
+      setProfileLoading(true);
+      const token = await user.getIdToken();
+      
+      // First try to fetch existing profile
       const response = await fetch(`${API_BASE_URL}/api/profiles/me`, {
         headers: {
-          Authorization: `Bearer ${await user.getIdToken()}`
+          Authorization: `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
         const profile = await response.json();
         setUserProfile(profile);
-      } else if (response.status === 404) {
-        // Create basic profile if it doesn't exist
+      } else {
+        // If profile doesn't exist, create a basic one
+        console.log('Profile not found, creating basic profile...');
         const basicProfile = {
           firebaseUid: user.uid,
           email: user.email,
+          userType: 'room_seeker', // Default user type
           name: user.displayName || user.email?.split('@')[0] || 'New User',
-          photos: [user.photoURL || ''],
-          location: {
-            city: '',
-            area: ''
-          },
-          preferences: {
-            budget: {
-              min: 0,
-              max: 0
+          profile: {
+            photos: [user.photoURL || ''],
+            location: {
+              type: 'Point',
+              coordinates: [0, 0],
+              city: '',
+              area: ''
             },
-            lifestyle: {
-              cleanliness: 5,
-              socialLevel: 5,
-              workMode: 'office',
-              smoking: 'no',
-              pets: 'no',
-              foodPreference: 'any'
+            preferences: {
+              budget: {
+                min: 0,
+                max: 0
+              },
+              roommates: {
+                gender: 'any',
+                ageRange: {
+                  min: 18,
+                  max: 99
+                }
+              },
+              lifestyle: {
+                cleanliness: 5,
+                socialLevel: 5,
+                workMode: 'office',
+                smoking: 'no',
+                pets: 'no',
+                foodPreference: 'any'
+              }
             }
-          }
+          },
+          onboarded: false
         };
         
+        console.log('Creating profile with data:', basicProfile);
         const createResponse = await fetch(`${API_BASE_URL}/api/profiles`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${await user.getIdToken()}`
+            Authorization: `Bearer ${token}`
           },
           body: JSON.stringify(basicProfile)
         });
 
         if (createResponse.ok) {
           const createdProfile = await createResponse.json();
+          console.log('Profile created successfully:', createdProfile);
           setUserProfile(createdProfile);
         } else {
-          console.error('Error creating basic profile:', await createResponse.text());
+          const errorText = await createResponse.text();
+          console.error('Error creating basic profile:', errorText);
           throw new Error('Failed to create basic profile');
         }
       }
     } catch (error) {
       console.error('Error fetching/creating profile:', error);
+      throw error;
     } finally {
       setProfileLoading(false);
     }
@@ -126,27 +145,39 @@ export const AuthProvider = ({ children }) => {
       const basicProfile = {
         firebaseUid: user.uid,
         email: user.email,
+        userType: 'room_seeker', // Default user type
         name: user.displayName || user.email?.split('@')[0] || 'New User',
-        photos: [user.photoURL || ''],
-        location: {
-          city: '',
-          area: ''
-        },
-        preferences: {
-          budget: {
-            min: 0,
-            max: 0
+        profile: {
+          photos: [user.photoURL || ''],
+          location: {
+            type: 'Point',
+            coordinates: [0, 0],
+            city: '',
+            area: ''
           },
-          lifestyle: {
-            cleanliness: 5, // Default values as per schema
-            socialLevel: 5,
-            workMode: 'office',
-            smoking: 'no',
-            pets: 'no',
-            foodPreference: 'any'
+          preferences: {
+            budget: {
+              min: 0,
+              max: 0
+            },
+            roommates: {
+              gender: 'any',
+              ageRange: {
+                min: 18,
+                max: 99
+              }
+            },
+            lifestyle: {
+              cleanliness: 5,
+              socialLevel: 5,
+              workMode: 'office',
+              smoking: 'no',
+              pets: 'no',
+              foodPreference: 'any'
+            }
           }
         },
-        onboarded: false // Explicitly set to false for initial creation
+        onboarded: false
       };
 
       const token = await user.getIdToken();
@@ -292,6 +323,20 @@ export const AuthProvider = ({ children }) => {
   const postListing = async (listingData) => {
     try {
       const token = await currentUser.getIdToken();
+      
+      // Convert images to base64
+      const imagePromises = listingData.images.map(file => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const base64Images = await Promise.all(imagePromises);
+
+      // Update profile with listing data and base64 images
       const response = await fetch(`${API_BASE_URL}/api/profiles/me`, {
         method: 'PUT',
         headers: {
@@ -301,7 +346,10 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({
           ...userProfile,
           userType: 'room_provider',
-          roomDetails: listingData
+          roomDetails: {
+            ...listingData,
+            images: base64Images
+          }
         })
       });
 

@@ -7,40 +7,71 @@ const auth = require('../middleware/auth');
 router.post('/', auth, async (req, res) => {
   try {
     console.log('Attempting to create profile for user:', req.user.uid);
-    const { firebaseUid, email, userType, name, photos, location, preferences } = req.body;
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
 
     // Check if a user with this firebaseUid already exists to prevent duplicates
-    let user = await User.findOne({ firebaseUid });
+    let user = await User.findOne({ firebaseUid: req.user.uid });
     if (user) {
-      console.log('User with firebaseUid', firebaseUid, 'already exists. Returning existing profile.');
+      console.log('User with firebaseUid', req.user.uid, 'already exists. Returning existing profile.');
       return res.status(200).json(user); // Return existing profile if found
     }
 
-    // Create a new user
+    // Create a new user with the provided data
     user = new User({
-      firebaseUid,
-      email,
-      userType: userType || 'room_seeker', // Default to room_seeker
-      name: name || email?.split('@')[0] || 'New User',
-      photos: photos || [],
-      location: location || { city: '', area: '' },
-      preferences: preferences || {
-        budget: { min: 0, max: 0 },
-        lifestyle: { smoking: '', pets: '', foodPreference: '', cleanlinessPreference: '' }
+      firebaseUid: req.user.uid,
+      email: req.body.email,
+      userType: req.body.userType || 'room_seeker',
+      name: req.body.name || req.body.email?.split('@')[0] || 'New User',
+      profile: {
+        photos: req.body.profile?.photos || [],
+        location: {
+          type: 'Point',
+          coordinates: req.body.profile?.location?.coordinates || [0, 0],
+          city: req.body.profile?.location?.city || '',
+          area: req.body.profile?.location?.area || ''
+        },
+        preferences: {
+          budget: {
+            min: req.body.profile?.preferences?.budget?.min || 0,
+            max: req.body.profile?.preferences?.budget?.max || 0
+          },
+          roommates: {
+            gender: req.body.profile?.preferences?.roommates?.gender || 'any',
+            ageRange: {
+              min: req.body.profile?.preferences?.roommates?.ageRange?.min || 18,
+              max: req.body.profile?.preferences?.roommates?.ageRange?.max || 99
+            }
+          },
+          lifestyle: {
+            cleanliness: req.body.profile?.preferences?.lifestyle?.cleanliness || 5,
+            socialLevel: req.body.profile?.preferences?.lifestyle?.socialLevel || 5,
+            workMode: req.body.profile?.preferences?.lifestyle?.workMode || 'office',
+            smoking: req.body.profile?.preferences?.lifestyle?.smoking || 'no',
+            pets: req.body.profile?.preferences?.lifestyle?.pets || 'no',
+            foodPreference: req.body.profile?.preferences?.lifestyle?.foodPreference || 'any'
+          }
+        }
       },
       // Initialize other fields as empty arrays or default values
       likes: [],
       dislikes: [],
       matches: [],
       roomDetails: {},
+      onboarded: false
     });
 
+    console.log('Creating new user with data:', JSON.stringify(user, null, 2));
     await user.save();
-    console.log('New user profile created:', { id: user._id, firebaseUid: user.firebaseUid, email: user.email });
+    console.log('New user profile created successfully:', { id: user._id, firebaseUid: user.firebaseUid, email: user.email });
     res.status(201).json(user);
   } catch (error) {
-    console.error('Error creating user profile:', error.message);
-    res.status(500).json({ message: 'Error creating user profile', error: error.message });
+    console.error('Error creating user profile:', error);
+    console.error('Full error details:', JSON.stringify(error, null, 2));
+    res.status(500).json({ 
+      message: 'Error creating user profile', 
+      error: error.message,
+      details: error.errors // Include validation errors if any
+    });
   }
 });
 
@@ -355,6 +386,29 @@ router.get('/matches', auth, async (req, res) => {
     console.error('Error fetching matches for user', req.user.uid, ':', error.message);
     console.error('Full error object during matches fetch:', error);
     res.status(500).json({ message: 'Error fetching matches', error: error.message });
+  }
+});
+
+// Get users who liked the current user
+router.get('/liked-by', auth, async (req, res) => {
+  try {
+    console.log('Fetching users who liked:', req.user.uid);
+    const currentUser = await User.findOne({ firebaseUid: req.user.uid });
+    if (!currentUser) {
+      console.log('User not found in database');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find all users who have the current user in their likes array
+    const usersWhoLiked = await User.find({
+      likes: currentUser._id
+    }).select('-password -email');
+
+    console.log('Found users who liked:', usersWhoLiked.length);
+    res.json(usersWhoLiked);
+  } catch (error) {
+    console.error('Error fetching users who liked:', error);
+    res.status(500).json({ message: 'Error fetching users who liked', error: error.message });
   }
 });
 

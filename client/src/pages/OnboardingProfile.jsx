@@ -229,12 +229,14 @@ const OnboardingProfile = () => {
   }, [loading, currentUser, userProfile, navigate, setUserType]);
 
   const handleUserTypeSelect = (type) => {
-    // Set the user type directly from the modal selection
-    setUserType(type);
+    // If type is room_seeker and hasProperty is true, set as room_provider
+    // Otherwise, use the type directly from the modal
+    const finalType = type === 'room_seeker' && formData.property.hasProperty ? 'room_provider' : type;
+    setUserType(finalType);
     setShowUserTypeModal(false);
     setFormData(prev => ({
       ...prev,
-      userType: type,
+      userType: finalType,
       property: {
         ...prev.property,
         hasProperty: type === 'room_provider' // Set hasProperty based on the initial selection
@@ -462,7 +464,7 @@ const OnboardingProfile = () => {
 
       const profileData = {
         name: formData.name,
-        userType: userType, // This will be either 'room_provider' or 'room_seeker'
+        userType: userType,
         onboarded: true,
         profile: {
           age: parseInt(formData.age),
@@ -523,22 +525,6 @@ const OnboardingProfile = () => {
           }
         }
       };
-
-      // Add property details if user is a room provider
-      if (userType === 'room_provider') {
-        profileData.profile.property = {
-          hasProperty: true,
-          rent: formData.property.rent,
-          propertyType: formData.property.propertyType,
-          bhkType: formData.property.bhkType,
-          availableFrom: formData.property.availableFrom,
-          furnishingStatus: formData.property.furnishingStatus,
-          amenities: formData.property.amenities,
-          description: formData.property.description,
-          images: formData.property.images,
-          location: formData.property.location
-        };
-      }
 
       console.log('Submitting profile data:', profileData);
       await updateProfile(profileData);

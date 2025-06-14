@@ -17,6 +17,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  Badge,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -26,6 +27,8 @@ import {
   Person as PersonIcon,
   Logout as LogoutIcon,
   Login as LoginIcon,
+  Favorite as FavoriteIcon,
+  Message as MessageIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -86,8 +89,10 @@ export default function Navbar() {
   const navItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
     { text: 'Search', icon: <SearchIcon />, path: '/explore' },
-    { text: 'Post Listing', icon: <AddIcon />, path: '/post-listing' },
+    { text: 'Post Listing', icon: <AddIcon />, path: '/post-listing', requiresProvider: userProfile?.userType === 'room_provider' },
     { text: 'Matches', icon: <PersonIcon />, path: '/matches' },
+    { text: 'Likes', icon: <FavoriteIcon />, path: '/likes' },
+    { text: 'Messages', icon: <MessageIcon />, path: '/messages' },
   ];
 
   const userMenuItems = [
@@ -182,18 +187,38 @@ export default function Navbar() {
           </Typography>
 
           {/* Desktop Navigation */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-            {navItems.map((item) => (
-              <Button
-                key={item.text}
-                component={Link}
-                to={item.path}
-                sx={{ my: 2, color: 'inherit', display: 'flex', alignItems: 'center' }}
-                startIcon={item.icon}
-              >
-                {item.text}
-              </Button>
-            ))}
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 4 }}>
+            {navItems.map((item) => {
+              if (item.requiresProvider && userProfile?.userType !== 'room_provider') return null;
+              return (
+                <Button
+                  key={item.text}
+                  component={Link}
+                  to={item.path}
+                  startIcon={item.icon}
+                  sx={{
+                    my: 2,
+                    color: 'text.primary',
+                    display: 'flex',
+                    mx: 1,
+                    ...(location.pathname === item.path && {
+                      color: 'primary.main',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 2,
+                        backgroundColor: 'primary.main',
+                      },
+                    }),
+                  }}
+                >
+                  {item.text}
+                </Button>
+              );
+            })}
           </Box>
 
           {/* User Menu */}
