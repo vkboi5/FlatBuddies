@@ -19,6 +19,7 @@ import {
   InputAdornment,
   Tooltip,
   Fade,
+  Chip,
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -26,6 +27,9 @@ import {
   MoreVert as MoreVertIcon,
   AttachFile as AttachFileIcon,
   EmojiEmotions as EmojiIcon,
+  ArrowBack as ArrowBackIcon,
+  Phone as PhoneIcon,
+  VideoCall as VideoCallIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -231,36 +235,50 @@ const Messages = () => {
           borderRight: '1px solid #e0e0e0',
           bgcolor: 'white',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          boxShadow: 2
         }}>
           {/* Search Bar */}
-          <Box sx={{ p: 2, bgcolor: '#f8f9fa' }}>
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: '#f0f2f5',
+            borderBottom: '1px solid #e0e0e0'
+          }}>
             <TextField
               fullWidth
               size="small"
-              placeholder="Search matches..."
+              placeholder="Search or start new chat"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon color="action" />
+                    <SearchIcon sx={{ color: '#919191' }} />
                   </InputAdornment>
                 ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
+                sx: {
                   bgcolor: 'white',
-                  '&:hover fieldset': {
-                    borderColor: 'primary.main',
+                  borderRadius: '8px',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
                   },
-                },
+                  '&:hover': {
+                    bgcolor: '#f8f9fa'
+                  }
+                }
               }}
             />
           </Box>
 
           {/* Matches List */}
-          <List sx={{ flex: 1, overflow: 'auto' }}>
+          <List sx={{ 
+            flex: 1, 
+            overflow: 'auto',
+            '& .MuiListItem-root': {
+              px: 2,
+              py: 1.5
+            }
+          }}>
             {Array.isArray(matches) && matches.map((match) => (
               <ListItem
                 key={match._id}
@@ -269,14 +287,15 @@ const Messages = () => {
                 onClick={() => setSelectedMatch(match)}
                 sx={{
                   '&.Mui-selected': {
-                    bgcolor: '#e3f2fd',
+                    bgcolor: '#f0f2f5',
                     '&:hover': {
-                      bgcolor: '#bbdefb',
+                      bgcolor: '#e9ebeb',
                     },
                   },
                   '&:hover': {
-                    bgcolor: '#f5f5f5',
+                    bgcolor: '#f8f9fa',
                   },
+                  borderBottom: '1px solid #f0f2f5'
                 }}
               >
                 <ListItemAvatar>
@@ -286,33 +305,87 @@ const Messages = () => {
                     variant="dot"
                     color="success"
                     invisible={!match.online}
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        backgroundColor: '#25D366',
+                        boxShadow: '0 0 0 2px white'
+                      }
+                    }}
                   >
                     <Avatar 
                       src={match.profile?.photos?.[0]} 
                       alt={match.name}
-                      sx={{ width: 48, height: 48 }}
+                      sx={{ 
+                        width: 48, 
+                        height: 48,
+                        border: '1px solid #e0e0e0'
+                      }}
                     />
                   </Badge>
                 </ListItemAvatar>
                 <ListItemText
                   primary={
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-                      {match.name}
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography 
+                        variant="subtitle1" 
+                        sx={{ 
+                          fontWeight: 'medium',
+                          color: '#111b21'
+                        }}
+                      >
+                        {match.name}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: '#667781',
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        {match.lastMessageTime ? format(new Date(match.lastMessageTime), 'HH:mm') : ''}
+                      </Typography>
+                    </Box>
                   }
                   secondary={
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {match.profile?.bio || 'No bio available'}
-                    </Typography>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      mt: 0.5
+                    }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: '#667781',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: '180px'
+                        }}
+                      >
+                        {match.profile?.bio || 'No bio available'}
+                      </Typography>
+                      {unreadCounts[match._id] > 0 && (
+                        <Badge
+                          badgeContent={unreadCounts[match._id]}
+                          color="primary"
+                          sx={{
+                            '& .MuiBadge-badge': {
+                              backgroundColor: '#25D366',
+                              color: 'white',
+                              minWidth: '20px',
+                              height: '20px',
+                              borderRadius: '10px',
+                              fontSize: '0.75rem',
+                              fontWeight: 'bold'
+                            }
+                          }}
+                        />
+                      )}
+                    </Box>
                   }
+                  sx={{ m: 0 }}
                 />
-                {unreadCounts[match._id] > 0 && (
-                  <Badge
-                    badgeContent={unreadCounts[match._id]}
-                    color="primary"
-                    sx={{ ml: 1 }}
-                  />
-                )}
               </ListItem>
             ))}
           </List>
@@ -325,90 +398,155 @@ const Messages = () => {
               {/* Chat Header */}
               <Box sx={{ 
                 p: 2, 
-                bgcolor: 'white',
-                borderBottom: '1px solid #e0e0e0',
+                bgcolor: '#3f51b5',
+                color: 'white',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                boxShadow: 2
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <IconButton 
+                    sx={{ color: 'white' }}
+                    onClick={() => setSelectedMatch(null)}
+                  >
+                    <ArrowBackIcon />
+                  </IconButton>
                   <Avatar 
                     src={selectedMatch.profile?.photos?.[0]} 
                     alt={selectedMatch.name}
-                    sx={{ width: 40, height: 40 }}
+                    sx={{ width: 40, height: 40, border: '2px solid white' }}
                   />
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                       {selectedMatch.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {selectedMatch.online ? 'Online' : 'Offline'}
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      {selectedMatch.online ? (
+                        <Chip 
+                          label="Online" 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: '#25D366', 
+                            color: 'white',
+                            height: '20px',
+                            '& .MuiChip-label': { px: 1 }
+                          }} 
+                        />
+                      ) : 'Last seen recently'}
                     </Typography>
                   </Box>
                 </Box>
-                <IconButton>
-                  <MoreVertIcon />
-                </IconButton>
               </Box>
 
               {/* Messages */}
               <Box sx={{ 
                 flex: 1, 
                 overflow: 'auto', 
-                p: 2,
+                p: 3,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 1
+                gap: 1.5,
+                bgcolor: '#f7f8fa',
+                background: 'none',
               }}>
-                {Array.isArray(messages) && messages.map((message, index) => (
-                  <Fade in key={index}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: message.sender._id === currentUser.uid ? 'flex-end' : 'flex-start',
-                        mb: 1,
-                      }}
-                    >
+                {Array.isArray(messages) && messages.map((message, index) => {
+                  const isOwnMessage = message.sender._id === currentUser.uid;
+                  const showSenderName = !isOwnMessage && (
+                    index === 0 || messages[index - 1]?.sender._id !== message.sender._id
+                  );
+                  return (
+                    <Fade in key={index}>
                       <Box
                         sx={{
-                          maxWidth: '70%',
-                          bgcolor: message.sender._id === currentUser.uid ? '#dcf8c6' : 'white',
-                          borderRadius: 2,
-                          p: 1.5,
-                          boxShadow: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
+                          mb: 0.5,
                         }}
                       >
-                        <Typography variant="body1">{message.content}</Typography>
-                        <Typography 
-                          variant="caption" 
-                          color="text.secondary"
-                          sx={{ 
-                            display: 'block',
-                            textAlign: 'right',
-                            mt: 0.5
+                        {showSenderName && (
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              color: '#6c63ff',
+                              fontWeight: 600,
+                              mb: 0.5,
+                              ml: 1
+                            }}
+                          >
+                            {message.sender.name}
+                          </Typography>
+                        )}
+                        <Box
+                          sx={{
+                            maxWidth: '70%',
+                            bgcolor: isOwnMessage 
+                              ? 'linear-gradient(135deg, #6c63ff 0%, #48c6ef 100%)' 
+                              : '#fff',
+                            color: isOwnMessage ? 'white' : '#222',
+                            borderRadius: isOwnMessage 
+                              ? '18px 18px 6px 18px' 
+                              : '18px 18px 18px 6px',
+                            p: 2,
+                            boxShadow: '0 2px 8px rgba(80,80,120,0.07)',
+                            position: 'relative',
+                            wordBreak: 'break-word',
+                            border: isOwnMessage ? 'none' : '1px solid #ececec',
+                            transition: 'background 0.2s',
                           }}
                         >
-                          {format(new Date(message.timestamp), 'HH:mm')}
-                        </Typography>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ fontSize: '1rem', lineHeight: 1.5 }}
+                          >
+                            {message.content}
+                          </Typography>
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              display: 'block',
+                              textAlign: 'right',
+                              mt: 1,
+                              color: isOwnMessage ? 'rgba(255,255,255,0.7)' : '#8a8a8a',
+                              fontSize: '0.8rem'
+                            }}
+                          >
+                            {format(new Date(message.timestamp), 'HH:mm')}
+                            {isOwnMessage && (
+                              <span style={{ marginLeft: '4px', color: '#b2e0ff' }}>
+                                ✓{message.read ? '✓' : ''}
+                              </span>
+                            )}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  </Fade>
-                ))}
+                    </Fade>
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </Box>
 
               {/* Message Input */}
               <Box sx={{ 
                 p: 2, 
-                bgcolor: 'white',
+                bgcolor: '#f0f2f5',
                 borderTop: '1px solid #e0e0e0'
               }}>
                 <form onSubmit={handleSendMessage}>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <IconButton>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 1, 
+                    alignItems: 'center',
+                    bgcolor: 'white',
+                    borderRadius: '24px',
+                    px: 2,
+                    py: 0.5
+                  }}>
+                    <IconButton sx={{ color: '#919191' }}>
                       <EmojiIcon />
                     </IconButton>
-                    <IconButton>
+                    <IconButton sx={{ color: '#919191' }}>
                       <AttachFileIcon />
                     </IconButton>
                     <TextField
@@ -418,14 +556,15 @@ const Messages = () => {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       disabled={sending}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#f0f2f5',
-                          borderRadius: 3,
-                          '&:hover fieldset': {
-                            borderColor: 'primary.main',
-                          },
-                        },
+                      variant="standard"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: {
+                          fontSize: '15px',
+                          '& input': {
+                            py: 1.5
+                          }
+                        }
                       }}
                     />
                     <Tooltip title="Send message">
@@ -433,6 +572,17 @@ const Messages = () => {
                         type="submit" 
                         color="primary"
                         disabled={!newMessage.trim() || sending}
+                        sx={{
+                          bgcolor: '#075e54',
+                          color: 'white',
+                          '&:hover': {
+                            bgcolor: '#128C7E'
+                          },
+                          '&.Mui-disabled': {
+                            bgcolor: '#e0e0e0',
+                            color: '#9e9e9e'
+                          }
+                        }}
                       >
                         <SendIcon />
                       </IconButton>

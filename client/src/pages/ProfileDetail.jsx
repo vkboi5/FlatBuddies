@@ -40,6 +40,7 @@ import {
   FaUsers,
   FaLaptop,
   FaBuilding,
+  FaHeart,
 } from 'react-icons/fa';
 
 const ProfileDetail = () => {

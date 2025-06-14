@@ -126,9 +126,15 @@ export default function Navbar() {
   );
 
   return (
-    <AppBar position="sticky" color="default" elevation={1}>
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
+    <AppBar position="sticky" elevation={0} sx={{
+      background: 'linear-gradient(90deg, #3f51b5 0%, #48c6ef 100%)',
+      boxShadow: '0 4px 24px 0 rgba(60,72,100,0.10)',
+      borderBottomLeftRadius: 16,
+      borderBottomRightRadius: 16,
+      minHeight: 72,
+    }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 4 } }}>
+        <Toolbar disableGutters sx={{ minHeight: 72 }}>
           {/* Logo */}
           <Typography
             variant="h6"
@@ -138,16 +144,19 @@ export default function Navbar() {
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
-              fontWeight: 700,
-              color: 'inherit',
+              fontWeight: 900,
+              fontSize: '2rem',
+              letterSpacing: 1,
+              color: 'white',
               textDecoration: 'none',
               cursor: 'pointer',
               '&:hover': {
-                opacity: 0.8,
+                opacity: 0.92,
               },
             }}
           >
-            FlatBuddies
+            <span style={{fontWeight: 900, letterSpacing: 2}}>Flat</span>
+            <span style={{fontWeight: 400, letterSpacing: 1}}>Buddies</span>
           </Typography>
 
           {/* Mobile menu button */}
@@ -155,10 +164,9 @@ export default function Navbar() {
             <IconButton
               size="large"
               edge="start"
-              color="inherit"
+              sx={{ color: 'white', mr: 2, bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 2, '&:hover': { bgcolor: 'rgba(255,255,255,0.18)' } }}
               aria-label="menu"
               onClick={() => setMobileMenuOpen(true)}
-              sx={{ mr: 2 }}
             >
               <MenuIcon />
             </IconButton>
@@ -174,16 +182,18 @@ export default function Navbar() {
               mr: 2,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
-              fontWeight: 700,
-              color: 'inherit',
+              fontWeight: 900,
+              fontSize: '1.5rem',
+              color: 'white',
               textDecoration: 'none',
               cursor: 'pointer',
               '&:hover': {
-                opacity: 0.8,
+                opacity: 0.92,
               },
+              textShadow: '0 2px 8px rgba(60,72,100,0.10)'
             }}
           >
-            FlatBuddies
+            <span style={{fontWeight: 900}}>Flat</span><span style={{fontWeight: 400}}>Buddies</span>
           </Typography>
 
           {/* Desktop Navigation */}
@@ -198,21 +208,22 @@ export default function Navbar() {
                   startIcon={item.icon}
                   sx={{
                     my: 2,
-                    color: 'text.primary',
-                    display: 'flex',
-                    mx: 1,
-                    ...(location.pathname === item.path && {
-                      color: 'primary.main',
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: 2,
-                        backgroundColor: 'primary.main',
-                      },
-                    }),
+                    color: location.pathname === item.path ? 'white' : 'rgba(255,255,255,0.85)',
+                    background: location.pathname === item.path ? 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)' : 'transparent',
+                    fontWeight: 600,
+                    borderRadius: '999px',
+                    px: 2.5,
+                    py: 1.2,
+                    mx: 1.2,
+                    fontSize: '1rem',
+                    boxShadow: location.pathname === item.path ? '0 2px 8px 0 rgba(60,72,100,0.10)' : 'none',
+                    position: 'relative',
+                    transition: 'all 0.18s',
+                    '&:hover': {
+                      background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
+                      color: 'white',
+                      boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
+                    },
                   }}
                 >
                   {item.text}
@@ -226,15 +237,21 @@ export default function Navbar() {
             {currentUser ? (
               <>
                 <Tooltip title="Open settings">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 2 }}>
                     <Avatar 
                       alt={userProfile?.profile?.name || currentUser.displayName || 'User'} 
                       src={userProfile?.profile?.photos?.[0] || currentUser.photoURL || `https://ui-avatars.com/api/?name=${userProfile?.profile?.name || currentUser.displayName || 'User'}`}
+                      sx={{
+                        border: '2.5px solid #fff',
+                        boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
+                        width: 44,
+                        height: 44,
+                      }}
                     />
                   </IconButton>
                 </Tooltip>
                 <Menu
-                  sx={{ mt: '45px' }}
+                  sx={{ mt: '45px', '& .MuiPaper-root': { borderRadius: 3, boxShadow: '0 8px 32px 0 rgba(60,72,100,0.16)' } }}
                   id="menu-appbar"
                   anchorEl={anchorElUser}
                   anchorOrigin={{
@@ -250,7 +267,7 @@ export default function Navbar() {
                   onClose={handleCloseUserMenu}
                 >
                   {userMenuItems.map((item) => (
-                    <MenuItem key={item.text} onClick={item.action}>
+                    <MenuItem key={item.text} onClick={item.action} sx={{ borderRadius: 2, my: 0.5, px: 2 }}>
                       <ListItemIcon>{item.icon}</ListItemIcon>
                       <Typography textAlign="center">{item.text}</Typography>
                     </MenuItem>
@@ -264,6 +281,20 @@ export default function Navbar() {
                 color="primary"
                 variant="contained"
                 startIcon={<LoginIcon />}
+                sx={{
+                  borderRadius: '999px',
+                  fontWeight: 700,
+                  px: 2.5,
+                  py: 1.2,
+                  fontSize: '1rem',
+                  boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
+                  background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
+                  color: 'white',
+                  '&:hover': {
+                    background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)',
+                    color: 'white',
+                  },
+                }}
               >
                 Login
               </Button>
@@ -271,7 +302,53 @@ export default function Navbar() {
           </Box>
         </Toolbar>
       </Container>
-      {renderMobileMenu()}
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        PaperProps={{
+          sx: {
+            background: 'linear-gradient(120deg, #f8fafc 0%, #e3e6f3 100%)',
+            boxShadow: '0 8px 32px 0 rgba(60,72,100,0.16)',
+            borderTopRightRadius: 24,
+            borderBottomRightRadius: 24,
+            width: 270,
+            py: 2,
+          }
+        }}
+      >
+        <Box sx={{ width: 250, pt: 2 }}>
+          <List>
+            {navItems.map((item) => (
+              <ListItem
+                button
+                key={item.text}
+                component={Link}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{
+                  borderRadius: 2,
+                  my: 1,
+                  px: 2,
+                  py: 1.5,
+                  background: location.pathname === item.path ? 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)' : 'transparent',
+                  color: location.pathname === item.path ? 'white' : '#3f51b5',
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  '&:hover': {
+                    background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
+                    color: 'white',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: 'inherit', fontSize: 28 }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
     </AppBar>
   );
 } 

@@ -21,6 +21,7 @@ import {
   Divider,
   Paper,
   Skeleton,
+  Badge,
 } from '@mui/material';
 import {
   Favorite as FavoriteIcon,
@@ -48,42 +49,45 @@ const ProfileCard = memo(({ profile, onLike, onDislike, onViewProfile, onStartCh
         display: 'flex',
         flexDirection: 'column',
         cursor: 'pointer',
+        borderRadius: 4,
+        boxShadow: '0 4px 24px 0 rgba(60,72,100,0.08)',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e3e6f3 100%)',
+        border: profile.userType === 'room_provider' ? '2px solid #6c63ff' : '2px solid #48c6ef',
         transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: 3,
+          transform: 'translateY(-6px) scale(1.03)',
+          boxShadow: '0 8px 32px 0 rgba(60,72,100,0.16)',
         },
+        p: 1.5,
       }}
       onClick={() => onViewProfile(profile)}
     >
-      <CardMedia
-        component="img"
-        height="200"
-        image={profile.photos?.length > 0 ? profile.photos[0] : '/assets/default-profile.jpg'}
-        alt={profile.name || 'User profile'}
-        sx={{ objectFit: 'cover' }}
-      />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Avatar
-            src={profile.photos?.length > 0 ? profile.photos[0] : '/assets/default-profile.jpg'}
-            alt={profile.name || 'User'}
-            sx={{ width: 56, height: 56, mr: 2 }}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
+        <Avatar
+          src={profile.photos?.length > 0 ? profile.photos[0] : '/assets/default-profile.jpg'}
+          alt={profile.name || 'User'}
+          sx={{ width: 84, height: 84, mb: 1, boxShadow: 2, border: '3px solid #fff' }}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mb: 1 }}>
+          <Chip
+            label={profile.userType === 'room_provider' ? 'Room Provider' : 'Looking for Room'}
+            color={profile.userType === 'room_provider' ? 'primary' : 'secondary'}
+            size="small"
+            sx={{ fontWeight: 600, borderRadius: 2, fontSize: '0.95rem', px: 2 }}
           />
-          <Box>
-            <Typography variant="h6" component="h2">
-              {profile.name || 'Unknown User'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {profile.age ? `${profile.age} years old` : 'Age not specified'}
-            </Typography>
-          </Box>
         </Box>
-
+        <Typography variant="h6" component="h2" sx={{ fontWeight: 700, mt: 1, color: '#3f51b5' }}>
+          {profile.name || 'Unknown User'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          {profile.age ? `${profile.age} years old` : 'Age not specified'}
+        </Typography>
+      </Box>
+      <CardContent sx={{ flexGrow: 1, pt: 0 }}>
         <Stack spacing={1} sx={{ mb: 2 }}>
           {profile.location?.city && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocationOn sx={{ color: 'text.secondary', mr: 1 }} />
+              <LocationOn sx={{ color: 'primary.main', mr: 1 }} />
               <Typography variant="body2">
                 {profile.location.city}
                 {profile.location.area ? `, ${profile.location.area}` : ''}
@@ -92,33 +96,12 @@ const ProfileCard = memo(({ profile, onLike, onDislike, onViewProfile, onStartCh
           )}
           {profile.occupation && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <WorkIcon sx={{ color: 'text.secondary', mr: 1 }} />
+              <WorkIcon sx={{ color: 'secondary.main', mr: 1 }} />
               <Typography variant="body2">{profile.occupation}</Typography>
             </Box>
           )}
         </Stack>
-
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-          {profile.userType === 'room_provider' ? (
-            <Chip
-              icon={<HomeIcon />}
-              label="Has a Room"
-              color="primary"
-              variant="outlined"
-              size="small"
-            />
-          ) : (
-            <Chip
-              icon={<PersonIcon />}
-              label="Looking for Room"
-              color="secondary"
-              variant="outlined"
-              size="small"
-            />
-          )}
-        </Box>
-
-        <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
           <Button
             variant="contained"
             color="primary"
@@ -130,6 +113,15 @@ const ProfileCard = memo(({ profile, onLike, onDislike, onViewProfile, onStartCh
             }}
             disabled={actionLoading[profile._id]}
             aria-label={`Like ${profile.name || 'user'}'s profile`}
+            sx={{
+              borderRadius: '999px',
+              fontWeight: 600,
+              boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
+              px: 2,
+              py: 1,
+              fontSize: '1rem',
+              transition: 'background 0.2s',
+            }}
           >
             {actionLoading[profile._id] ? <CircularProgress size={24} /> : 'Like Back'}
           </Button>
@@ -143,6 +135,15 @@ const ProfileCard = memo(({ profile, onLike, onDislike, onViewProfile, onStartCh
               onStartChat(profile._id);
             }}
             aria-label={`Message ${profile.name || 'user'}`}
+            sx={{
+              borderRadius: '999px',
+              fontWeight: 600,
+              px: 2,
+              py: 1,
+              fontSize: '1rem',
+              borderWidth: 2,
+              transition: 'border-color 0.2s',
+            }}
           >
             Message
           </Button>
@@ -269,7 +270,7 @@ export default function Likes() {
   };
 
   const handleStartChat = (profileId) => {
-    navigate(`/chat/${profileId}`);
+    navigate(`/messages`);
   };
 
   if (loading) {
@@ -289,9 +290,17 @@ export default function Likes() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper elevation={0} sx={{ p: 3, mb: 4, bgcolor: 'background.default' }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{
+      width: '100vw',
+      minHeight: '100vh',
+      background: 'linear-gradient(120deg, #f8fafc 0%, #e3e6f3 100%)',
+      px: 0,
+      py: 4,
+      position: 'relative',
+      overflowX: 'hidden',
+    }}>
+      <Paper elevation={0} sx={{ p: 3, mb: 4, bgcolor: 'background.default', maxWidth: 1400, mx: 'auto' }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 800, color: '#3f51b5' }}>
           Your Likes
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
@@ -304,19 +313,21 @@ export default function Likes() {
           No one has liked your profile yet. Keep swiping to find your perfect match!
         </Alert>
       ) : (
-        <Grid container spacing={3}>
-          {likes.map((profile) => (
-            <ProfileCard
-              key={profile._id}
-              profile={profile}
-              onLike={handleLike}
-              onDislike={handleDislike}
-              onViewProfile={handleViewProfile}
-              onStartChat={handleStartChat}
-              actionLoading={actionLoading}
-            />
-          ))}
-        </Grid>
+        <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+          <Grid container spacing={3}>
+            {likes.map((profile) => (
+              <ProfileCard
+                key={profile._id}
+                profile={profile}
+                onLike={handleLike}
+                onDislike={handleDislike}
+                onViewProfile={handleViewProfile}
+                onStartChat={handleStartChat}
+                actionLoading={actionLoading}
+              />
+            ))}
+          </Grid>
+        </Box>
       )}
 
       <Dialog
@@ -325,6 +336,13 @@ export default function Likes() {
         maxWidth="md"
         fullWidth
         aria-labelledby="profile-dialog-title"
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            background: 'linear-gradient(120deg, #f8fafc 0%, #e3e6f3 100%)',
+            boxShadow: '0 8px 32px 0 rgba(60,72,100,0.16)'
+          }
+        }}
       >
         {selectedProfile ? (
           <>
@@ -458,6 +476,6 @@ export default function Likes() {
           </DialogContent>
         )}
       </Dialog>
-    </Container>
+    </Box>
   );
 }

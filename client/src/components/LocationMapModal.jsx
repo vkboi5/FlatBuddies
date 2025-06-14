@@ -10,6 +10,7 @@ import {
   IconButton,
   CircularProgress,
   Typography,
+  Paper,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { GoogleMap, Autocomplete, useJsApiLoader } from '@react-google-maps/api';
@@ -35,8 +36,21 @@ const LocationMapModal = ({ open, onClose, onSelectLocation, initialLocation }) 
 
   const [map, setMap] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
   const autocompleteRef = useRef(null);
   const mapRef = useRef(null);
+
+  const fetchSuggestions = (input) => {
+    if (!input.trim()) { setSuggestions([]); return; }
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address: input }, (results, status) => {
+      if (status === "OK" && results) {
+         setSuggestions(results);
+      } else {
+         setSuggestions([]);
+      }
+    });
+  };
 
   const onLoad = useCallback((mapInstance) => {
     mapRef.current = mapInstance;
@@ -176,7 +190,7 @@ const LocationMapModal = ({ open, onClose, onSelectLocation, initialLocation }) 
           </Box>
         ) : (
           <>
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 2, position: 'relative' }}>
               <Autocomplete
                 onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
                 onPlaceChanged={onPlaceChanged}
@@ -186,9 +200,20 @@ const LocationMapModal = ({ open, onClose, onSelectLocation, initialLocation }) 
                   placeholder='Search for a city or area'
                   fullWidth
                   variant='outlined'
-                  sx={{ mb: 2 }}
+                  onChange={(e) => fetchSuggestions(e.target.value)}
+                  onBlur={() => fetchSuggestions(autocompleteRef.current?.getPlace()?.name || '')}
+                  onKeyDown={(e) => { if (e.key === 'Enter') onPlaceChanged(); }}
                 />
               </Autocomplete>
+              {suggestions.length > 0 && (
+                <Paper sx={{ position: 'absolute', zIndex: 1, width: '100%', mt: 0.5, maxHeight: 200, overflow: 'auto' }}>
+                  {suggestions.map((suggestion, index) => (
+                    <Box key={index} sx={{ p: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }} onClick={() => { setSelectedPlace(suggestion); mapRef.current?.panTo(suggestion.geometry.location); mapRef.current?.setZoom(15); setSuggestions([]); }}>
+                      {suggestion.formatted_address}
+                    </Box>
+                  ))}
+                </Paper>
+              )}
             </Box>
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
