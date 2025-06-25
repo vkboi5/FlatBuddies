@@ -356,35 +356,35 @@ const PostListing = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      background: 'linear-gradient(120deg, #e3f2fd 0%, #e8eaf6 100%)',
+      background: '#f5f8fd',
       py: 6,
     }}>
-      <Container maxWidth="lg">
-        <Paper elevation={4} sx={{
-          p: { xs: 2, sm: 4 },
-          borderRadius: 5,
-          boxShadow: '0 8px 32px 0 rgba(60,72,100,0.10)',
-          background: 'rgba(255,255,255,0.95)',
-          maxWidth: 1000,
+      <Container maxWidth="md">
+        <Paper elevation={6} sx={{
+          p: { xs: 2, sm: 5 },
+          borderRadius: 6,
+          boxShadow: '0 12px 40px 0 rgba(36,81,166,0.13)',
+          background: '#fff',
+          maxWidth: 800,
           mx: 'auto',
         }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, color: 'primary.main', letterSpacing: 1 }}>
+          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, color: '#2451a6', letterSpacing: 1, mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-              <HomeIcon color="primary" sx={{ fontSize: 36 }} />
+              <HomeIcon sx={{ fontSize: 36, color: '#2451a6' }} />
               Post Your Room
             </Box>
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary" gutterBottom align="center">
+          <Typography variant="subtitle1" color="text.secondary" gutterBottom align="center" sx={{ mb: 3 }}>
             Share details about your room
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
             {/* Replacement Listing Section */}
-            <Box sx={{ mb: 4, p: 3, bgcolor: '#f5f7fa', borderRadius: 3, boxShadow: '0 2px 8px 0 rgba(60,72,100,0.04)' }}>
+            <Box sx={{ mb: 4, p: 3, bgcolor: '#e3eafc', borderRadius: 4, boxShadow: '0 2px 8px 0 rgba(60,72,100,0.04)' }}>
               <FormControl component="fieldset">
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <CheckCircleIcon color="primary" sx={{ fontSize: 24 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  <CheckCircleIcon sx={{ fontSize: 24, color: '#2451a6' }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#2451a6' }}>
                     Is this a replacement listing?
                   </Typography>
                 </Box>
@@ -405,7 +405,7 @@ const PostListing = () => {
                   </Typography>
                 </Box>
                 {formData.isReplacementListing && (
-                  <Alert severity="info" sx={{ mt: 2 }}>
+                  <Alert severity="info" sx={{ mt: 2, borderRadius: 2, background: '#f5f8fd' }}>
                     <AlertTitle>14-Day Replacement Guarantee</AlertTitle>
                     We'll help you find a replacement roommate within 14 days or less! Our matching algorithm prioritizes replacement listings to ensure a smooth transition.
                   </Alert>
@@ -416,8 +416,8 @@ const PostListing = () => {
             {/* Room Details Section */}
             <Divider sx={{ my: 4 }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <BedIcon color="primary" sx={{ fontSize: 28 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <BedIcon sx={{ fontSize: 28, color: '#2451a6' }} />
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#2451a6' }}>
                 Room Details
               </Typography>
             </Box>
@@ -437,7 +437,7 @@ const PostListing = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton onClick={() => setShowMapModal(true)}>
-                          <LocationOn />
+                          <LocationOn sx={{ color: '#2451a6' }} />
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -513,7 +513,7 @@ const PostListing = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <Typography variant="subtitle1" gutterBottom>
+                <Typography variant="subtitle1" gutterBottom sx={{ color: '#2451a6', fontWeight: 700 }}>
                   Room Features
                 </Typography>
                 <Autocomplete
@@ -557,7 +557,8 @@ const PostListing = () => {
                         label={option}
                         {...getTagProps({ index })}
                         color="primary"
-                        variant="outlined"
+                        variant="filled"
+                        sx={{ borderRadius: '999px', fontWeight: 600, fontSize: '1rem', px: 2, py: 0.5, background: '#e3eafc', color: '#2451a6', mb: 0.5 }}
                       />
                     ))
                   }
@@ -568,8 +569,8 @@ const PostListing = () => {
             {/* Room Photos Section */}
             <Divider sx={{ my: 4 }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, mt: 2 }}>
-              <AddAPhotoIcon color="primary" sx={{ fontSize: 28 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <AddAPhotoIcon sx={{ fontSize: 28, color: '#2451a6' }} />
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#2451a6' }}>
                 Room Photos
               </Typography>
             </Box>
@@ -596,9 +597,9 @@ const PostListing = () => {
                       py: 1.2,
                       fontSize: '1rem',
                       background: '#f7fafd',
-                      color: 'primary.main',
-                      borderColor: 'primary.main',
-                      '&:hover': { background: '#e3f2fd' },
+                      color: '#2451a6',
+                      borderColor: '#2451a6',
+                      '&:hover': { background: '#e3eafc', borderColor: '#2451a6', color: '#2451a6' },
                       transition: 'all 0.18s',
                     }}
                   >
@@ -616,6 +617,10 @@ const PostListing = () => {
                     boxShadow: '0 4px 16px 0 rgba(60,72,100,0.10)',
                     position: 'relative',
                     overflow: 'hidden',
+                    transition: 'box-shadow 0.18s',
+                    '&:hover': {
+                      boxShadow: '0 8px 32px 0 rgba(36,81,166,0.13)',
+                    },
                   }}>
                     <CardMedia
                       component="img"
@@ -650,9 +655,10 @@ const PostListing = () => {
                   fontWeight: 700,
                   fontSize: '1.1rem',
                   py: 1.5,
-                  background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
-                  boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
-                  '&:hover': { background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)' },
+                  background: '#2451a6',
+                  color: '#fff',
+                  boxShadow: '0 4px 16px 0 rgba(36,81,166,0.13)',
+                  '&:hover': { background: '#1d3e7a' },
                   transition: 'all 0.18s',
                 }}
               >

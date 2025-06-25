@@ -136,25 +136,25 @@ const Landing = () => {
           <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
             <Typography variant="h2" component="h1" sx={{ fontWeight: 900, fontSize: { xs: '2.2rem', md: '3.5rem' }, mb: 0.5, letterSpacing: 1, lineHeight: 1.1, color: '#2451a6', textAlign: { xs: 'center', md: 'left' } }}>
               Find Your Perfect
-            </Typography>
+          </Typography>
             <Box sx={{ minHeight: { xs: 48, md: 60 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 3 }}>
               <TypewriterWords />
             </Box>
             <Typography variant="h5" sx={{ color: '#2451a6', mb: 4, maxWidth: 600, fontWeight: 400, fontSize: { xs: '1.1rem', md: '1.5rem' }, mx: { xs: 'auto', md: 0 }, textAlign: { xs: 'center', md: 'left' }, lineHeight: 1.6 }}>
               RoomEase makes it easy to find compatible roommates and ideal living spaces.<br />
               <span style={{ color: '#2451a6', fontWeight: 600 }}>Join our community and start your journey to better living.</span>
-            </Typography>
+          </Typography>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: { xs: 'center', md: 'flex-start' }, alignItems: 'center', gap: 2, mt: 3 }}>
-              <Button
-                component={Link}
+            <Button
+              component={Link}
                 to="/auth"
-                variant="contained"
-                size="large"
+              variant="contained"
+              size="large"
                 endIcon={<ArrowForward />}
-                sx={{
+              sx={{
                   px: 5,
                   py: 1.7,
-                  borderRadius: '9999px',
+                borderRadius: '9999px',
                   fontWeight: 700,
                   fontSize: '1.2rem',
                   background: '#2451a6',
@@ -162,19 +162,19 @@ const Landing = () => {
                   color: 'white',
                   '&:hover': { background: '#1d3e7a' },
                   transition: 'all 0.18s',
-                }}
-              >
-                Get Started
-              </Button>
-              <Button
-                component={Link}
-                to="/auth"
-                variant="outlined"
-                size="large"
-                sx={{
+              }}
+            >
+              Get Started
+            </Button>
+            <Button
+              component={Link}
+              to="/auth"
+              variant="outlined"
+              size="large"
+              sx={{
                   px: 5,
                   py: 1.7,
-                  borderRadius: '9999px',
+                borderRadius: '9999px',
                   fontWeight: 700,
                   fontSize: '1.2rem',
                   backgroundColor: '#fff',
@@ -183,12 +183,12 @@ const Landing = () => {
                   boxShadow: '0 2px 8px 0 rgba(60,72,100,0.08)',
                   '&:hover': { backgroundColor: '#e3eafc', borderColor: '#2451a6', color: '#1d3e7a' },
                   transition: 'all 0.18s',
-                }}
-              >
-                Sign In
-              </Button>
-            </Box>
+              }}
+            >
+              Sign In
+            </Button>
           </Box>
+        </Box>
           {/* Right: Hero Image */}
           <Box sx={{ flex: 1, display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center', mt: { xs: 5, md: 0 } }}>
             <Box
@@ -403,7 +403,7 @@ const Landing = () => {
             {/* Create Profile */}
             <Box sx={{ minWidth: { xs: 270, sm: 250, md: 0 }, flex: '1 1 0', maxWidth: 320 }}>
               <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
-                <StyledPaper elevation={3}>
+              <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
                       background: '#2451a6',
@@ -417,22 +417,22 @@ const Landing = () => {
                       fontSize: 36,
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     }}>
-                      <FaUserFriends />
+                  <FaUserFriends />
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
                     <span style={{ color: '#2451a6' }}>Create a Profile</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                    Build your personalized profile sharing your lifestyle, interests, and living preferences.
-                  </Typography>
-                </StyledPaper>
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                  Build your personalized profile sharing your lifestyle, interests, and living preferences.
+                </Typography>
+              </StyledPaper>
               </motion.div>
             </Box>
             {/* Set Preferences */}
             <Box sx={{ minWidth: { xs: 270, sm: 250, md: 0 }, flex: '1 1 0', maxWidth: 320 }}>
               <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
-                <StyledPaper elevation={3}>
+              <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
                       background: '#b3c7f7',
@@ -446,22 +446,22 @@ const Landing = () => {
                       fontSize: 36,
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     }}>
-                      <FaSearch />
+                  <FaSearch />
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
                     <span style={{ color: '#2451a6' }}>Set Preferences</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                    Customize your search with specific preferences like budget, location, and living habits.
-                  </Typography>
-                </StyledPaper>
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                  Customize your search with specific preferences like budget, location, and living habits.
+                </Typography>
+              </StyledPaper>
               </motion.div>
             </Box>
             {/* Find Flats */}
             <Box sx={{ minWidth: { xs: 270, sm: 250, md: 0 }, flex: '1 1 0', maxWidth: 320 }}>
               <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}>
-                <StyledPaper elevation={3}>
+              <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
                       background: '#2451a6',
@@ -475,22 +475,22 @@ const Landing = () => {
                       fontSize: 36,
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     }}>
-                      <FaHome />
+                  <FaHome />
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
                     <span style={{ color: '#2451a6' }}>Find Flats</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                    Browse through available flats and find your perfect living space.
-                  </Typography>
-                </StyledPaper>
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                  Browse through available flats and find your perfect living space.
+                </Typography>
+              </StyledPaper>
               </motion.div>
             </Box>
             {/* Swipe and Match */}
             <Box sx={{ minWidth: { xs: 270, sm: 250, md: 0 }, flex: '1 1 0', maxWidth: 320 }}>
               <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}>
-                <StyledPaper elevation={3}>
+              <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
                       background: '#b3c7f7',
@@ -504,16 +504,16 @@ const Landing = () => {
                       fontSize: 36,
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     }}>
-                      <FaArrowsAltH />
+                  <FaArrowsAltH />
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
                     <span style={{ color: '#2451a6' }}>Swipe and Match</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                    Connect with potential roommates through our easy-to-use swipe interface.
-                  </Typography>
-                </StyledPaper>
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                  Connect with potential roommates through our easy-to-use swipe interface.
+                </Typography>
+              </StyledPaper>
               </motion.div>
             </Box>
           </Box>

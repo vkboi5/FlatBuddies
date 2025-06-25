@@ -218,31 +218,33 @@ const Messages = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ height: '100vh', py: 2 }}>
+    <Container maxWidth="lg" sx={{ height: '100vh', py: 2, bgcolor: '#f5f8fd' }}>
       <Paper 
-        elevation={3} 
+        elevation={6} 
         sx={{ 
           height: '100%', 
           display: 'flex', 
           overflow: 'hidden',
-          borderRadius: 2,
-          bgcolor: '#f5f5f5'
+          borderRadius: 4,
+          bgcolor: '#fff',
+          boxShadow: '0 12px 40px 0 rgba(36,81,166,0.10)'
         }}
       >
         {/* Matches List */}
         <Box sx={{ 
           width: 320, 
-          borderRight: '1px solid #e0e0e0',
-          bgcolor: 'white',
+          borderRight: '1px solid #e3eafc',
+          bgcolor: '#f7fafd',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: 2
+          boxShadow: 0
         }}>
           {/* Search Bar */}
           <Box sx={{ 
             p: 2, 
-            bgcolor: '#f0f2f5',
-            borderBottom: '1px solid #e0e0e0'
+            bgcolor: '#e3eafc',
+            borderBottom: '1px solid #e3eafc',
+            boxShadow: '0 2px 8px 0 rgba(36,81,166,0.04)'
           }}>
             <TextField
               fullWidth
@@ -253,17 +255,17 @@ const Messages = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#919191' }} />
+                    <SearchIcon sx={{ color: '#2451a6' }} />
                   </InputAdornment>
                 ),
                 sx: {
-                  bgcolor: 'white',
-                  borderRadius: '8px',
+                  bgcolor: '#fff',
+                  borderRadius: '999px',
                   '& .MuiOutlinedInput-notchedOutline': {
                     border: 'none'
                   },
                   '&:hover': {
-                    bgcolor: '#f8f9fa'
+                    bgcolor: '#f7fafd'
                   }
                 }
               }}
@@ -286,16 +288,18 @@ const Messages = () => {
                 selected={selectedMatch?._id === match._id}
                 onClick={() => setSelectedMatch(match)}
                 sx={{
+                  borderRadius: 3,
+                  mb: 1,
                   '&.Mui-selected': {
-                    bgcolor: '#f0f2f5',
+                    bgcolor: '#e3eafc',
                     '&:hover': {
-                      bgcolor: '#e9ebeb',
+                      bgcolor: '#d1dbf7',
                     },
                   },
                   '&:hover': {
-                    bgcolor: '#f8f9fa',
+                    bgcolor: '#f7fafd',
                   },
-                  borderBottom: '1px solid #f0f2f5'
+                  borderBottom: '1px solid #e3eafc'
                 }}
               >
                 <ListItemAvatar>
@@ -392,18 +396,20 @@ const Messages = () => {
         </Box>
 
         {/* Chat Area */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', bgcolor: '#f0f2f5' }}>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', bgcolor: '#f5f8fd' }}>
           {selectedMatch ? (
             <>
               {/* Chat Header */}
               <Box sx={{ 
                 p: 2, 
-                bgcolor: '#3f51b5',
+                bgcolor: '#2451a6',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                boxShadow: 2
+                boxShadow: 2,
+                borderTopLeftRadius: 4,
+                borderTopRightRadius: 4
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <IconButton 
@@ -447,7 +453,7 @@ const Messages = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 1.5,
-                bgcolor: '#f7f8fa',
+                bgcolor: '#f7fafd',
                 background: 'none',
               }}>
                 {Array.isArray(messages) && messages.map((message, index) => {
@@ -482,17 +488,17 @@ const Messages = () => {
                           sx={{
                             maxWidth: '70%',
                             bgcolor: isOwnMessage 
-                              ? 'linear-gradient(135deg, #6c63ff 0%, #48c6ef 100%)' 
+                              ? 'linear-gradient(135deg, #2451a6 0%, #6c63ff 100%)' 
                               : '#fff',
                             color: isOwnMessage ? 'white' : '#222',
                             borderRadius: isOwnMessage 
-                              ? '18px 18px 6px 18px' 
-                              : '18px 18px 18px 6px',
+                              ? '22px 22px 8px 22px' 
+                              : '22px 22px 22px 8px',
                             p: 2,
-                            boxShadow: '0 2px 8px rgba(80,80,120,0.07)',
+                            boxShadow: '0 2px 8px rgba(36,81,166,0.07)',
                             position: 'relative',
                             wordBreak: 'break-word',
-                            border: isOwnMessage ? 'none' : '1px solid #ececec',
+                            border: isOwnMessage ? 'none' : '1px solid #e3eafc',
                             transition: 'background 0.2s',
                           }}
                         >
@@ -530,18 +536,19 @@ const Messages = () => {
               {/* Message Input */}
               <Box sx={{ 
                 p: 2, 
-                bgcolor: '#f0f2f5',
-                borderTop: '1px solid #e0e0e0'
+                bgcolor: '#e3eafc',
+                borderTop: '1px solid #e3eafc'
               }}>
                 <form onSubmit={handleSendMessage}>
                   <Box sx={{ 
                     display: 'flex', 
                     gap: 1, 
                     alignItems: 'center',
-                    bgcolor: 'white',
-                    borderRadius: '24px',
-                    px: 2,
-                    py: 0.5
+                    bgcolor: '#fff',
+                    borderRadius: '999px',
+                    px: 2.5,
+                    py: 1,
+                    boxShadow: '0 2px 8px 0 rgba(36,81,166,0.06)',
                   }}>
                     <IconButton sx={{ color: '#919191' }}>
                       <EmojiIcon />

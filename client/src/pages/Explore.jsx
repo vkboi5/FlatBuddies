@@ -125,86 +125,93 @@ const Explore = () => {
             width: '100%',
             maxWidth: 384,
             mx: 'auto',
-            borderRadius: '16px',
-            border: '1px solid #e0e0e0',
-            boxShadow: '0px 15px 45px rgba(0, 0, 0, 0.2), 0px 30px 90px rgba(0, 0, 0, 0.18)',
-            transform: 'translateY(0)',
-            transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'translateY(-12px)',
-              boxShadow: '0px 20px 50px rgba(0, 0, 0, 0.25), 0px 40px 100px rgba(0, 0, 0, 0.2)',
-            },
-            overflow: 'hidden',
-            background: '#fdfdfd',
+            borderRadius: '22px',
+            border: 'none',
+            boxShadow: '0 8px 32px 0 rgba(36,81,166,0.10)',
+            background: '#fff',
             display: 'flex',
             flexDirection: 'column',
             cursor: 'pointer',
+            overflow: 'visible',
+            transition: 'transform 0.18s, box-shadow 0.18s',
+            '&:hover': {
+              transform: 'translateY(-10px) scale(1.03)',
+              boxShadow: '0 16px 48px 0 rgba(36,81,166,0.13)',
+            },
           }}
         >
-          {/* Profile Image with Gradient Overlay */}
-          <Box sx={{ position: 'relative', height: '50%', flexShrink: 0 }}>
+          {/* Profile Image with Soft Blue Overlay */}
+          <Box sx={{ position: 'relative', height: 220, bgcolor: '#e3eafc', borderTopLeftRadius: '22px', borderTopRightRadius: '22px' }}>
             <CardMedia
               component="img"
-              height="100%"
+              height="220"
               image={profile.profile?.photos?.[0] || 'https://via.placeholder.com/400x500'}
               alt={profile.name}
               sx={{ 
                 objectFit: 'cover',
-                filter: 'brightness(0.8)',
+                width: '100%',
+                height: '100%',
+                borderTopLeftRadius: '22px',
+                borderTopRightRadius: '22px',
               }}
             />
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 0,
+                top: 0,
                 left: 0,
                 right: 0,
-                height: '60%',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%)',
+                bottom: 0,
+                background: 'linear-gradient(to bottom, rgba(36,81,166,0.10) 0%, rgba(36,81,166,0.18) 100%)',
+                borderTopLeftRadius: '22px',
+                borderTopRightRadius: '22px',
               }}
             />
-            
-            {/* Profile Info Overlay */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                p: 4,
-                color: 'white',
-              }}
-            >
-              <Stack direction="row" spacing={2} alignItems="flex-end" sx={{ mb: 2 }}>
-                <Typography variant="h3" sx={{ fontWeight: 'bold', textShadow: '1px 1px 3px rgba(0,0,0,0.4)' }}>
-                  {profile.name}
-                </Typography>
-                {profile.profile?.age && (
-                  <Typography variant="h4" sx={{ fontWeight: 'light', textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
-                    {profile.profile.age}
-                  </Typography>
-                )}
-              </Stack>
-              
-              {profile.profile?.occupation && (
-                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-                  <FaBriefcase size={18} />
-                  <Typography variant="body1">
-                    {profile.profile.occupation}
-                  </Typography>
-                </Stack>
-              )}
-              
-              {profile.profile?.location?.city && (
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <FaMapMarkerAlt size={18} />
-                  <Typography variant="body1">
-                    {profile.profile.location.city}
-                    {profile.profile.location.area && `, ${profile.profile.location.area}`}
-                  </Typography>
-                </Stack>
-              )}
+            {/* Avatar Overlapping Image */}
+            <Box sx={{ position: 'absolute', left: '50%', bottom: -48, transform: 'translateX(-50%)', zIndex: 2 }}>
+              <Avatar
+                src={profile.profile?.photos?.[0]}
+                alt={profile.name}
+                sx={{
+                  width: 96,
+                  height: 96,
+                  border: '4px solid #fff',
+                  boxShadow: '0 4px 16px 0 rgba(36,81,166,0.10)',
+                  fontSize: 40,
+                  bgcolor: '#e3eafc',
+                  color: '#2451a6',
+                }}
+              >
+                {(!profile.profile?.photos || profile.profile.photos.length === 0) && (profile.name ? profile.name[0] : '?')}
+              </Avatar>
             </Box>
+          </Box>
+
+          {/* Main Info Section */}
+          <Box sx={{ pt: 7, pb: 2, px: 3, textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: '#2451a6', mb: 0.5, letterSpacing: 0.5 }}>
+              {profile.name}
+              {profile.profile?.age && (
+                <Typography component="span" variant="h5" sx={{ fontWeight: 400, color: '#2451a6', ml: 1 }}>
+                  {profile.profile.age}
+                </Typography>
+              )}
+            </Typography>
+            {profile.profile?.occupation && (
+              <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center" sx={{ mb: 1, mt: 0.5 }}>
+                <FaBriefcase size={18} color="#2451a6" />
+                <Typography variant="body1" sx={{ color: '#2451a6', fontWeight: 500 }}>{profile.profile.occupation}</Typography>
+              </Stack>
+            )}
+            {profile.profile?.location?.city && (
+              <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+                <FaMapMarkerAlt size={18} color="#2451a6" />
+                <Typography variant="body1" sx={{ color: '#2451a6', fontWeight: 500 }}>
+                  {profile.profile.location.city}
+                  {profile.profile.location.area && `, ${profile.profile.location.area}`}
+                </Typography>
+              </Stack>
+            )}
           </Box>
 
           {/* Scrollable Content Wrapper */}
@@ -726,7 +733,7 @@ const Explore = () => {
   const currentProfile = profiles[currentIndex];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', py: 4 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f8fd', py: 4 }}>
       <Container maxWidth="sm">
         <Box sx={{ mb: 4 }}>
           {userChoice === 'room_seeker' ? (
@@ -734,13 +741,31 @@ const Explore = () => {
               value={viewMode}
               onChange={(e, newValue) => setViewMode(newValue)}
               centered
-              sx={{ mb: 2 }}
+              sx={{ mb: 2, borderRadius: '999px', background: '#e3eafc', minHeight: 56, boxShadow: '0 2px 12px 0 rgba(60,72,100,0.06)' }}
+              TabIndicatorProps={{ style: { display: 'none' } }}
             >
               <Tab
                 value="flats"
-                label="Flats"
-                icon={<FaHome />}
+                label={<span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Flats</span>}
+                icon={<FaHome color={viewMode === 'flats' ? '#fff' : '#2451a6'} />}
                 iconPosition="start"
+                sx={{
+                  borderRadius: '999px',
+                  mx: 1,
+                  px: 4,
+                  py: 1.5,
+                  background: viewMode === 'flats' ? '#2451a6' : 'transparent',
+                  color: viewMode === 'flats' ? '#2451a6' : '#fff',
+                  fontWeight: 700,
+                  fontSize: '1.1rem',
+                  boxShadow: viewMode === 'flats' ? '0 2px 8px 0 rgba(60,72,100,0.10)' : 'none',
+                  transition: 'all 0.18s',
+                  minHeight: 48,
+                  '&:hover': {
+                    background: viewMode === 'flats' ? '#2451a6' : '#b3c7f7',
+                    color: viewMode === 'flats' ? '#2451a6' : '#fff',
+                  },
+                }}
               />
             </Tabs>
           ) : (
@@ -748,20 +773,38 @@ const Explore = () => {
               value={viewMode}
               onChange={(e, newValue) => setViewMode(newValue)}
               centered
-              sx={{ mb: 2 }}
+              sx={{ mb: 2, borderRadius: '999px', background: '#e3eafc', minHeight: 56, boxShadow: '0 2px 12px 0 rgba(60,72,100,0.06)' }}
+              TabIndicatorProps={{ style: { display: 'none' } }}
             >
               <Tab
                 value="roommates"
-                label="Roommates"
-                icon={<FaUserFriends />}
+                label={<span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Roommates</span>}
+                icon={<FaUserFriends color={viewMode === 'roommates' ? '#fff' : '#2451a6'} />}
                 iconPosition="start"
+                sx={{
+                  borderRadius: '999px',
+                  mx: 1,
+                  px: 4,
+                  py: 1.5,
+                  background: viewMode === 'roommates' ? '#2451a6' : 'transparent',
+                  color: viewMode === 'roommates' ? '#fff' : '#2451a6',
+                  fontWeight: 700,
+                  fontSize: '1.1rem',
+                  boxShadow: viewMode === 'roommates' ? '0 2px 8px 0 rgba(60,72,100,0.10)' : 'none',
+                  transition: 'all 0.18s',
+                  minHeight: 48,
+                  '&:hover': {
+                    background: viewMode === 'roommates' ? '#2451a6' : '#b3c7f7',
+                    color: viewMode === 'roommates' ? '#fff' : '#2451a6',
+                  },
+                }}
               />
             </Tabs>
           )}
         </Box>
 
         {/* Card Container */}
-        <Box sx={{ position: 'relative', height: '85vh', width: '100%', maxWidth: 384, mx: 'auto' }}>
+        <Box sx={{ position: 'relative', height: '85vh', width: '100%', maxWidth: 420, mx: 'auto' }}>
           {currentProfile ? (
               <TinderCard
               key={currentProfile._id}
@@ -784,15 +827,17 @@ const Explore = () => {
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 borderRadius: '1.5rem',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                background: 'white',
+                boxShadow: '0 10px 30px rgba(36,81,166,0.08)',
+                background: '#e3eafc',
+                border: '2px dashed #b3c7f7',
               }}
             >
               <Box sx={{ textAlign: 'center', p: 4 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}>
+                <FaUserFriends size={48} color="#2451a6" style={{ marginBottom: 12 }} />
+                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#2451a6' }}>
                   No more profiles
                 </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                <Typography variant="body1" sx={{ color: '#4a5fa7' }}>
                   Check back later for new matches!
                 </Typography>
               </Box>

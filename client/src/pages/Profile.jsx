@@ -17,18 +17,17 @@ import {
   Grid,
   Chip,
   Avatar,
-  Autocomplete,
   OutlinedInput,
+  IconButton,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { FaBroom, FaUsers, FaLaptop, FaBuilding } from 'react-icons/fa';
+import { FaBroom, FaUsers } from 'react-icons/fa';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import LocationMapModal from '../components/LocationMapModal';
 import UserTypeModal from '../components/UserTypeModal';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { initializeApp } from 'firebase/app';
-import { createFilterOptions } from '@mui/material/Autocomplete';
 import { useNavigate } from 'react-router-dom';
 
 const firebaseConfig = {
@@ -49,8 +48,6 @@ const interestsOptions = [
   'Animals', 'Cars', 'Motorcycles', 'Dancing', 'Yoga', 'Meditation', 'Cycling', 'Swimming',
   'Running', 'Fishing', 'Hunting', 'Collecting', 'Board Games', 'Puzzles'
 ];
-
-const filterOptions = createFilterOptions();
 
 export default function Profile() {
   const { currentUser, userProfile, updateProfile, updateUserType, profileLoading } = useAuth();
@@ -322,431 +319,322 @@ export default function Profile() {
   return (
     <Box sx={{
       minHeight: '100vh',
-      background: 'linear-gradient(120deg, #e3f2fd 0%, #e8eaf6 100%)',
+      background: '#f5f8fd',
       py: 7,
     }}>
-      <Container maxWidth="sm">
+      <Container maxWidth="md">
         <Paper sx={{
           p: { xs: 2, sm: 4 },
           borderRadius: 5,
-          boxShadow: '0 8px 32px 0 rgba(60,72,100,0.10)',
-          background: 'rgba(255,255,255,0.97)',
+          boxShadow: '0 8px 32px 0 rgba(36,81,166,0.10)',
+          background: '#fff',
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 2 }}>
-            <Avatar
-              src={photoPreview}
-              sx={{
-                width: 90,
-                height: 90,
-                boxShadow: '0 4px 16px 0 rgba(60,72,100,0.10)',
-                border: '3px solid #e3e6f3',
-                mr: 2,
-              }}
-            />
-            <Box>
-              <Typography variant="h4" gutterBottom sx={{ fontWeight: 900, color: 'primary.main', letterSpacing: 1 }}>
-            My Profile
-          </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-            ({form.userType === 'room_seeker' ? 'Looking for a room' : 'Looking for a roommate'})
-          </Typography>
-            </Box>
-          <Button
-            variant="outlined"
-            onClick={() => setShowUserTypeChangeModal(true)}
-              sx={{ ml: 'auto', borderRadius: '999px', fontWeight: 600, px: 3, py: 1.2, fontSize: '1rem', borderColor: 'primary.main', color: 'primary.main', '&:hover': { background: '#e3f2fd' }, transition: 'all 0.18s' }}
-          >
-            Change User Type
-          </Button>
-        </Box>
-          <Divider sx={{ mb: 4 }} />
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField
-            label="Full Name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            disabled={!editing}
-            required
-              InputProps={{ sx: { borderRadius: 3, bgcolor: '#f7fafd' } }}
-          />
-          <TextField
-            label="Age"
-            type="number"
-            name="age"
-            value={form.age}
-            onChange={handleChange}
-            disabled={!editing}
-            required
-              InputProps={{ sx: { borderRadius: 3, bgcolor: '#f7fafd' } }}
-          />
-          <TextField
-            label="Occupation"
-            name="occupation"
-            value={form.occupation}
-            onChange={handleChange}
-            disabled={!editing}
-            variant="outlined"
-              InputProps={{ sx: { borderRadius: 3, bgcolor: '#f7fafd' } }}
-          />
-          <FormControl fullWidth required disabled={!editing}>
-            <InputLabel>Gender</InputLabel>
-            <Select
-              name="gender"
-              value={form.gender}
-              label="Gender"
-              onChange={handleChange}
-                sx={{ borderRadius: 3, bgcolor: '#f7fafd' }}
-            >
-              <MenuItem value="male">Male</MenuItem>
-              <MenuItem value="female">Female</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            label="Location"
-            value={form.location.city ? `${form.location.city}${form.location.area ? ', ' + form.location.area : ''}` : ''}
-            onClick={() => editing && setShowMapModal(true)}
-            onFocus={(e) => e.target.blur()}
-            readOnly
-            variant="outlined"
-            required
-            disabled={!editing}
-            InputProps={{
-              readOnly: true,
-                sx: { borderRadius: 3, bgcolor: '#f7fafd' },
-            }}
-          />
-          <FormControl fullWidth disabled={!editing}>
-            <InputLabel id="interests-label">Interests</InputLabel>
-            <Select
-              labelId="interests-label"
-              multiple
-              name="interests"
-              value={form.interests}
-              onChange={handleChange}
-              input={<OutlinedInput id="select-multiple-chip" label="Interests" />}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} />
-                  ))}
-                </Box>
-              )}
-                sx={{ borderRadius: 3, bgcolor: '#f7fafd' }}
-            >
-              {interestsOptions.map((interest) => (
-                <MenuItem
-                  key={interest}
-                  value={interest}
-                  style={{
-                    fontWeight: form.interests.indexOf(interest) === -1
-                      ? 'normal'
-                      : 'bold',
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 3, flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
+            <Box sx={{ position: 'relative' }}>
+              <Avatar
+                src={photoPreview}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  boxShadow: '0 4px 24px 0 rgba(36,81,166,0.10)',
+                  border: '4px solid #fff',
+                }}
+              />
+              {editing && (
+                <IconButton
+                  component="label"
+                  htmlFor="personal-photo-upload"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    bgcolor: '#2451a6',
+                    color: '#fff',
+                    '&:hover': { bgcolor: '#1d3e7a' }
                   }}
                 >
-                  {interest}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Bio"
-            name="bio"
-            value={form.bio}
-            onChange={handleChange}
-            multiline
-            minRows={3}
-            disabled={!editing}
-              InputProps={{ sx: { borderRadius: 3, bgcolor: '#f7fafd' } }}
-          />
-
-          <Box>
-            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-              Personal Photo
-            </Typography>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              style={{ display: 'none' }}
-              id="personal-photo-upload"
-              disabled={!editing}
-            />
-            <label htmlFor="personal-photo-upload">
-                <Button variant="outlined" component="span" startIcon={<AddAPhotoIcon />} disabled={!editing}
-                  sx={{ borderRadius: '999px', fontWeight: 600, px: 3, py: 1.2, fontSize: '1rem', borderColor: 'primary.main', color: 'primary.main', '&:hover': { background: '#e3f2fd' }, transition: 'all 0.18s' }}
-                >
-                Upload Photo
-              </Button>
-            </label>
-            {photoPreview && (
-              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                  <Avatar src={photoPreview} sx={{ width: 80, height: 80, mr: 2, boxShadow: '0 4px 16px 0 rgba(60,72,100,0.10)', border: '2px solid #e3e6f3' }} />
-                {editing && (
-                  <Button
-                    variant="text"
-                    color="error"
-                    onClick={() => {
-                      setPhotoFile(null);
-                      setPhotoPreview(null);
-                      setForm(prev => ({ ...prev, photos: [] }));
-                    }}
+                  <AddAPhotoIcon />
+                </IconButton>
+              )}
+            </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h4" gutterBottom sx={{ fontWeight: 900, color: '#2451a6', letterSpacing: 1 }}>
+                My Profile
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                ({form.userType === 'room_seeker' ? 'Looking for a room' : 'Looking for a roommate'})
+              </Typography>
+            </Box>
+            <Button
+              variant="outlined"
+              onClick={() => setShowUserTypeChangeModal(true)}
+              sx={{ ml: { xs: 0, sm: 'auto' }, mt: { xs: 2, sm: 0 }, borderRadius: '999px', fontWeight: 600, px: 3, py: 1.2, fontSize: '1rem', borderColor: '#2451a6', color: '#2451a6', '&:hover': { background: '#e3f2fd', borderColor: '#2451a6' }, transition: 'all 0.18s' }}
+            >
+              Change Role
+            </Button>
+          </Box>
+          <Divider sx={{ mb: 4 }} />
+          
+          <Grid container spacing={4}>
+            {/* Left Column */}
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
+                <TextField
+                  label="Full Name"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  disabled={!editing}
+                  required
+                  InputProps={{ sx: { borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd' } }}
+                />
+                <TextField
+                  label="Age"
+                  type="number"
+                  name="age"
+                  value={form.age}
+                  onChange={handleChange}
+                  disabled={!editing}
+                  required
+                  InputProps={{ sx: { borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd' } }}
+                />
+                <TextField
+                  label="Occupation"
+                  name="occupation"
+                  value={form.occupation}
+                  onChange={handleChange}
+                  disabled={!editing}
+                  variant="outlined"
+                  InputProps={{ sx: { borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd' } }}
+                />
+                <FormControl fullWidth required disabled={!editing}>
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    name="gender"
+                    value={form.gender}
+                    label="Gender"
+                    onChange={handleChange}
+                    sx={{ borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd' }}
                   >
-                    Remove Photo
-                  </Button>
-                )}
-              </Box>
-            )}
-          </Box>
-
-            <Box sx={{ mt: 2, bgcolor: '#f5f7fa', borderRadius: 3, p: 3, boxShadow: '0 2px 8px 0 rgba(60,72,100,0.04)' }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
-              Lifestyle Preferences
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
-            <Box sx={{ mb: 3 }}>
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                <FaBroom size={20} color="#666" />
-                <Typography variant="subtitle1">Cleanliness Level</Typography>
-              </Stack>
-              <Slider
-                value={form.preferences.lifestyle.cleanliness}
-                onChange={handleSliderChange('cleanliness')}
-                disabled={!editing}
-                min={1}
-                max={10}
-                marks
-                valueLabelDisplay="auto"
-                sx={{
-                  '& .MuiSlider-thumb': {
-                    width: 24,
-                    height: 24,
-                  },
-                  '& .MuiSlider-track': {
-                    height: 8,
-                  },
-                  '& .MuiSlider-rail': {
-                    height: 8,
-                  },
-                }}
-              />
-              <Typography variant="body2" color="text.secondary" align="center">
-                {form.preferences.lifestyle.cleanliness === 1 ? 'Very Relaxed' :
-                 form.preferences.lifestyle.cleanliness === 10 ? 'Very Clean' :
-                 'Moderate'}
-              </Typography>
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                <FaUsers size={20} color="#666" />
-                <Typography variant="subtitle1">Social Level</Typography>
-              </Stack>
-              <Slider
-                value={form.preferences.lifestyle.socialLevel}
-                onChange={handleSliderChange('socialLevel')}
-                disabled={!editing}
-                min={1}
-                max={10}
-                marks
-                valueLabelDisplay="auto"
-                sx={{
-                  '& .MuiSlider-thumb': {
-                    width: 24,
-                    height: 24,
-                  },
-                  '& .MuiSlider-track': {
-                    height: 8,
-                  },
-                  '& .MuiSlider-rail': {
-                    height: 8,
-                  },
-                }}
-              />
-              <Typography variant="body2" color="text.secondary" align="center">
-                {form.preferences.lifestyle.socialLevel === 1 ? 'Very Private' :
-                 form.preferences.lifestyle.socialLevel === 10 ? 'Very Social' :
-                 'Moderate'}
-              </Typography>
-            </Box>
-
-            <FormControl fullWidth disabled={!editing} sx={{ mb: 3 }}>
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                {form.preferences.lifestyle.workMode === 'wfh' ? (
-                  <FaLaptop size={20} color="#666" />
-                ) : form.preferences.lifestyle.workMode === 'office' ? (
-                  <FaBuilding size={20} color="#666" />
-                ) : (
-                  <FaUsers size={20} color="#666" />
-                )}
-                <Typography variant="subtitle1">Work Mode</Typography>
-              </Stack>
-              <Select
-                name="preferences.lifestyle.workMode"
-                value={form.preferences.lifestyle.workMode}
-                onChange={handleChange}
-                sx={{ mt: 1 }}
-              >
-                <MenuItem value="wfh">Work from Home</MenuItem>
-                <MenuItem value="office">Office Work</MenuItem>
-                <MenuItem value="hybrid">Hybrid Work</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth variant="outlined" disabled={!editing} sx={{ mb: 3 }}>
-              <InputLabel>Smoking</InputLabel>
-              <Select
-                name="preferences.lifestyle.smoking"
-                value={form.preferences.lifestyle.smoking}
-                onChange={handleChange}
-                label="Smoking"
-              >
-                <MenuItem value="yes">Yes</MenuItem>
-                <MenuItem value="no">No</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth variant="outlined" disabled={!editing} sx={{ mb: 3 }}>
-              <InputLabel>Pets</InputLabel>
-              <Select
-                name="preferences.lifestyle.pets"
-                value={form.preferences.lifestyle.pets}
-                onChange={handleChange}
-                label="Pets"
-              >
-                <MenuItem value="yes">Yes</MenuItem>
-                <MenuItem value="no">No</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth variant="outlined" disabled={!editing} sx={{ mb: 3 }}>
-              <InputLabel>Food Preference</InputLabel>
-              <Select
-                name="preferences.lifestyle.foodPreference"
-                value={form.preferences.lifestyle.foodPreference}
-                onChange={handleChange}
-                label="Food Preference"
-              >
-                <MenuItem value="vegetarian">Vegetarian</MenuItem>
-                <MenuItem value="non-vegetarian">Non-Vegetarian</MenuItem>
-                <MenuItem value="vegan">Vegan</MenuItem>
-                <MenuItem value="any">Any</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-
-          {form.userType === 'room_seeker' && (
-              <Box sx={{ mt: 2, bgcolor: '#f5f7fa', borderRadius: 3, p: 3, boxShadow: '0 2px 8px 0 rgba(60,72,100,0.04)' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
-                Budget & Roommate Preferences
-              </Typography>
-              <Divider sx={{ mb: 3 }} />
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Typography gutterBottom>Budget Range (₹)</Typography>
-                  <Slider
-                    value={[form.preferences.budget.min, form.preferences.budget.max]}
-                    onChange={(e, newValue) => setForm(prev => ({
-                      ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        budget: {
-                          min: newValue[0],
-                          max: newValue[1]
-                        }
-                      }
-                    }))}
-                    valueLabelDisplay="auto"
-                    min={1000}
-                    max={100000}
-                    step={1000}
-                    disableSwap
-                    disabled={!editing}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth variant="outlined" required disabled={!editing}>
-                    <InputLabel>Preferred Gender</InputLabel>
-                    <Select
-                      name="preferences.roommates.gender"
-                      value={form.preferences.roommates.gender}
-                      onChange={handleChange}
-                      label="Preferred Gender"
-                    >
-                      <MenuItem value="">Select preference</MenuItem>
-                      <MenuItem value="male">Male</MenuItem>
-                      <MenuItem value="female">Female</MenuItem>
-                      <MenuItem value="any">Any</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Box display="flex" gap={2}>
-                    <TextField
-                      fullWidth
-                      label="Min Age"
-                      type="number"
-                      name="preferences.roommates.ageRange.min"
-                      value={form.preferences.roommates.ageRange.min}
-                      onChange={handleChange}
-                      variant="outlined"
-                      required
-                      disabled={!editing}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Max Age"
-                      type="number"
-                      name="preferences.roommates.ageRange.max"
-                      value={form.preferences.roommates.ageRange.max}
-                      onChange={handleChange}
-                      variant="outlined"
-                      required
-                      disabled={!editing}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-
-          {form.userType === 'room_provider' && (
-              <Box sx={{ mt: 2, bgcolor: '#f5f7fa', borderRadius: 3, p: 3, boxShadow: '0 2px 8px 0 rgba(60,72,100,0.04)' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
-                Property Details
-              </Typography>
-              <Divider sx={{ mb: 3 }} />
-              <Grid item xs={12}>
+                    <MenuItem value="male">Male</MenuItem>
+                    <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                  </Select>
+                </FormControl>
                 <TextField
                   fullWidth
-                  label="Rent Amount"
-                  type="number"
-                  name="preferences.budget.min"
-                  value={form.preferences.budget.min}
-                  onChange={handleChange}
+                  label="Location"
+                  value={form.location.city ? `${form.location.city}${form.location.area ? ', ' + form.location.area : ''}` : ''}
+                  onClick={() => editing && setShowMapModal(true)}
+                  onFocus={(e) => e.target.blur()}
+                  readOnly
                   variant="outlined"
                   required
                   disabled={!editing}
+                  InputProps={{
+                    readOnly: true,
+                    sx: { borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd', cursor: editing ? 'pointer' : 'default' },
+                  }}
                 />
-              </Grid>
-            </Box>
-          )}
+                <TextField
+                  label="Bio"
+                  name="bio"
+                  value={form.bio}
+                  onChange={handleChange}
+                  multiline
+                  minRows={4}
+                  disabled={!editing}
+                  InputProps={{ sx: { borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd' } }}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  style={{ display: 'none' }}
+                  id="personal-photo-upload"
+                  disabled={!editing}
+                />
+              </Stack>
+            </Grid>
 
-          {editing ? (
-              <Button variant="contained" onClick={handleSave} disabled={saving} startIcon={saving ? <CircularProgress size={20} color="inherit" /> : null}
-                sx={{ borderRadius: '999px', fontWeight: 700, fontSize: '1.1rem', py: 1.5, background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)', boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)', '&:hover': { background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)' }, transition: 'all 0.18s' }}
+            {/* Right Column */}
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
+                <FormControl fullWidth disabled={!editing}>
+                  <InputLabel id="interests-label">Interests</InputLabel>
+                  <Select
+                    labelId="interests-label"
+                    multiple
+                    name="interests"
+                    value={form.interests}
+                    onChange={handleChange}
+                    input={<OutlinedInput id="select-multiple-chip" label="Interests" />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} sx={{ borderRadius: '999px', bgcolor: '#e3eafc', color: '#2451a6', fontWeight: 600 }} />
+                        ))}
+                      </Box>
+                    )}
+                    sx={{ borderRadius: 3, bgcolor: editing ? '#fff' : '#f7fafd' }}
+                  >
+                    {interestsOptions.map((interest) => (
+                      <MenuItem
+                        key={interest}
+                        value={interest}
+                      >
+                        {interest}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <Paper sx={{ mt: 2, bgcolor: '#f7fafd', borderRadius: 4, p: 3, boxShadow: 'none' }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#2451a6', mb: 2 }}>
+                    Lifestyle Preferences
+                  </Typography>
+                  <Stack spacing={3}>
+                    <Box>
+                      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                        <FaBroom size={20} color="#2451a6" />
+                        <Typography variant="subtitle1">Cleanliness Level</Typography>
+                      </Stack>
+                      <Slider
+                        value={form.preferences.lifestyle.cleanliness}
+                        onChange={handleSliderChange('cleanliness')}
+                        disabled={!editing}
+                        min={1} max={10} marks valueLabelDisplay="auto"
+                        sx={{ color: '#2451a6' }}
+                      />
+                    </Box>
+                    <Box>
+                      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                        <FaUsers size={20} color="#2451a6" />
+                        <Typography variant="subtitle1">Social Level</Typography>
+                      </Stack>
+                      <Slider
+                        value={form.preferences.lifestyle.socialLevel}
+                        onChange={handleSliderChange('socialLevel')}
+                        disabled={!editing}
+                        min={1} max={10} marks valueLabelDisplay="auto"
+                        sx={{ color: '#2451a6' }}
+                      />
+                    </Box>
+                    <FormControl fullWidth disabled={!editing}>
+                      <InputLabel>Work Mode</InputLabel>
+                      <Select name="preferences.lifestyle.workMode" value={form.preferences.lifestyle.workMode} onChange={handleChange} label="Work Mode">
+                        <MenuItem value="wfh">Work from Home</MenuItem>
+                        <MenuItem value="office">Office Work</MenuItem>
+                        <MenuItem value="hybrid">Hybrid Work</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth disabled={!editing}>
+                      <InputLabel>Smoking</InputLabel>
+                      <Select name="preferences.lifestyle.smoking" value={form.preferences.lifestyle.smoking} onChange={handleChange} label="Smoking">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth disabled={!editing}>
+                      <InputLabel>Pets</InputLabel>
+                      <Select name="preferences.lifestyle.pets" value={form.preferences.lifestyle.pets} onChange={handleChange} label="Pets">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth disabled={!editing}>
+                      <InputLabel>Food Preference</InputLabel>
+                      <Select name="preferences.lifestyle.foodPreference" value={form.preferences.lifestyle.foodPreference} onChange={handleChange} label="Food Preference">
+                        <MenuItem value="vegetarian">Vegetarian</MenuItem>
+                        <MenuItem value="non-vegetarian">Non-Vegetarian</MenuItem>
+                        <MenuItem value="vegan">Vegan</MenuItem>
+                        <MenuItem value="any">Any</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Stack>
+                </Paper>
+
+                {form.userType === 'room_seeker' && (
+                  <Paper sx={{ mt: 2, bgcolor: '#f7fafd', borderRadius: 4, p: 3, boxShadow: 'none' }}>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#2451a6', mb: 2 }}>
+                      Budget & Roommate Preferences
+                    </Typography>
+                    <Stack spacing={3}>
+                      <Box>
+                        <Typography gutterBottom>Budget Range (₹{form.preferences.budget.min} - ₹{form.preferences.budget.max})</Typography>
+                        <Slider
+                          value={[form.preferences.budget.min, form.preferences.budget.max]}
+                          onChange={(e, newValue) => setForm(prev => ({ ...prev, preferences: { ...prev.preferences, budget: { min: newValue[0], max: newValue[1] } } }))}
+                          valueLabelDisplay="auto"
+                          min={1000} max={100000} step={1000}
+                          disableSwap disabled={!editing}
+                          sx={{ color: '#2451a6' }}
+                        />
+                      </Box>
+                      <FormControl fullWidth variant="outlined" required disabled={!editing}>
+                        <InputLabel>Preferred Gender</InputLabel>
+                        <Select
+                          name="preferences.roommates.gender"
+                          value={form.preferences.roommates.gender}
+                          onChange={handleChange}
+                          label="Preferred Gender"
+                        >
+                          <MenuItem value="male">Male</MenuItem>
+                          <MenuItem value="female">Female</MenuItem>
+                          <MenuItem value="any">Any</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <Box display="flex" gap={2}>
+                        <TextField
+                          fullWidth
+                          label="Min Age"
+                          type="number"
+                          name="preferences.roommates.ageRange.min"
+                          value={form.preferences.roommates.ageRange.min}
+                          onChange={handleChange}
+                          variant="outlined"
+                          required
+                          disabled={!editing}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Max Age"
+                          type="number"
+                          name="preferences.roommates.ageRange.max"
+                          value={form.preferences.roommates.ageRange.max}
+                          onChange={handleChange}
+                          variant="outlined"
+                          required
+                          disabled={!editing}
+                        />
+                      </Box>
+                    </Stack>
+                  </Paper>
+                )}
+
+              </Stack>
+            </Grid>
+          </Grid>
+          
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            {editing ? (
+              <>
+                <Button variant="text" onClick={() => setEditing(false)} sx={{ color: '#555' }}>Cancel</Button>
+                <Button variant="contained" onClick={handleSave} disabled={saving} startIcon={saving ? <CircularProgress size={20} color="inherit" /> : null}
+                  sx={{ borderRadius: '999px', fontWeight: 700, fontSize: '1.1rem', py: 1.5, px: 4, background: '#2451a6', boxShadow: '0 2px 8px 0 rgba(36,81,166,0.10)', '&:hover': { background: '#1d3e7a' }, transition: 'all 0.18s' }}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </>
+            ) : (
+              <Button variant="contained" onClick={() => setEditing(true)}
+                sx={{ borderRadius: '999px', fontWeight: 700, px: 4, py: 1.5, fontSize: '1.1rem', background: '#2451a6', color: '#fff', '&:hover': { background: '#1d3e7a' }, transition: 'all 0.18s' }}
               >
-              {saving ? 'Saving...' : 'Save'}
-            </Button>
-          ) : (
-              <Button variant="outlined" onClick={() => setEditing(true)}
-                sx={{ borderRadius: '999px', fontWeight: 700, px: 3, py: 1.2, fontSize: '1rem', borderColor: 'primary.main', color: 'primary.main', '&:hover': { background: '#e3f2fd' }, transition: 'all 0.18s' }}
-              >
-              Edit Profile
-            </Button>
-          )}
-        </Box>
-      </Paper>
+                Edit Profile
+              </Button>
+            )}
+          </Box>
+        </Paper>
       </Container>
       <LocationMapModal
         open={showMapModal}
