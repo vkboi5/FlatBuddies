@@ -127,7 +127,8 @@ export default function Navbar() {
 
   return (
     <AppBar position="sticky" elevation={0} sx={{
-      background: 'linear-gradient(90deg, #3f51b5 0%, #48c6ef 100%)',
+      background: '#2451a6',
+      borderBottom: '2.5px solid #b3c7f7',
       boxShadow: '0 4px 24px 0 rgba(60,72,100,0.10)',
       borderBottomLeftRadius: 16,
       borderBottomRightRadius: 16,
@@ -155,8 +156,8 @@ export default function Navbar() {
               },
             }}
           >
-            <span style={{fontWeight: 900, letterSpacing: 2}}>Flat</span>
-            <span style={{fontWeight: 400, letterSpacing: 1}}>Buddies</span>
+            <span style={{fontWeight: 900, letterSpacing: 2, color: '#fff'}}>Flat</span>
+            <span style={{fontWeight: 400, letterSpacing: 1, color: '#fff'}}>Buddies</span>
           </Typography>
 
           {/* Mobile menu button */}
@@ -193,7 +194,7 @@ export default function Navbar() {
               textShadow: '0 2px 8px rgba(60,72,100,0.10)'
             }}
           >
-            <span style={{fontWeight: 900}}>Flat</span><span style={{fontWeight: 400}}>Buddies</span>
+            <span style={{fontWeight: 900, color: '#fff'}}>Flat</span><span style={{fontWeight: 400, color: '#b3c7f7'}}>Buddies</span>
           </Typography>
 
           {/* Desktop Navigation */}
@@ -208,9 +209,9 @@ export default function Navbar() {
                   startIcon={item.icon}
                   sx={{
                     my: 2,
-                    color: location.pathname === item.path ? 'white' : 'rgba(255,255,255,0.85)',
-                    background: location.pathname === item.path ? 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)' : 'transparent',
-                    fontWeight: 600,
+                    color: location.pathname === item.path ? '#2451a6' : '#fff',
+                    background: location.pathname === item.path ? '#fff' : 'transparent',
+                    fontWeight: 700,
                     borderRadius: '999px',
                     px: 2.5,
                     py: 1.2,
@@ -220,8 +221,8 @@ export default function Navbar() {
                     position: 'relative',
                     transition: 'all 0.18s',
                     '&:hover': {
-                      background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
-                      color: 'white',
+                      background: '#2d5db3',
+                      color: '#fff',
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     },
                   }}
@@ -242,7 +243,9 @@ export default function Navbar() {
                       alt={userProfile?.profile?.name || currentUser.displayName || 'User'} 
                       src={userProfile?.profile?.photos?.[0] || currentUser.photoURL || `https://ui-avatars.com/api/?name=${userProfile?.profile?.name || currentUser.displayName || 'User'}`}
                       sx={{
-                        border: '2.5px solid #fff',
+                        border: '2.5px solid #b3c7f7',
+                        background: '#b3c7f7',
+                        color: '#2451a6',
                         boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
                         width: 44,
                         height: 44,
@@ -288,11 +291,11 @@ export default function Navbar() {
                   py: 1.2,
                   fontSize: '1rem',
                   boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
-                  background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
-                  color: 'white',
+                  background: '#fff',
+                  color: '#2451a6',
                   '&:hover': {
-                    background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)',
-                    color: 'white',
+                    background: '#b3c7f7',
+                    color: '#2451a6',
                   },
                 }}
               >
@@ -332,13 +335,13 @@ export default function Navbar() {
                   my: 1,
                   px: 2,
                   py: 1.5,
-                  background: location.pathname === item.path ? 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)' : 'transparent',
-                  color: location.pathname === item.path ? 'white' : '#3f51b5',
+                  background: location.pathname === item.path ? '#fff' : 'transparent',
+                  color: location.pathname === item.path ? '#2451a6' : '#fff',
                   fontWeight: 600,
                   fontSize: '1.1rem',
                   '&:hover': {
-                    background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
-                    color: 'white',
+                    background: '#2d5db3',
+                    color: '#fff',
                   },
                 }}
               >

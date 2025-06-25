@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaHome, FaUserFriends, FaSearch, FaArrowsAltH } from 'react-icons/fa';
@@ -14,6 +14,10 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { ArrowForward } from '@mui/icons-material';
+import bgImg from '../assets/landingPagePic1.png';
+import beautifulRoomImg from '../assets/BeautifulRoom.png';
+import friendlyRoommateImg from '../assets/friendly-roommate.jpg';
+
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -38,13 +42,62 @@ const GradientText = styled('span')({
   fontWeight: 900,
 });
 
+// TypewriterWords component for typewriting animation
+const words = ['Roommate', 'Flat'];
+function TypewriterWords() {
+  const [index, setIndex] = useState(0);
+  const [displayed, setDisplayed] = useState('');
+  const [showCursor, setShowCursor] = useState(true);
+  useEffect(() => {
+    let timeout;
+    let word = words[index];
+    if (displayed.length < word.length) {
+      timeout = setTimeout(() => setDisplayed(word.slice(0, displayed.length + 1)), 80);
+    } else {
+      timeout = setTimeout(() => {
+        setShowCursor(false);
+        setTimeout(() => {
+          setShowCursor(true);
+          setDisplayed('');
+          setIndex((prev) => (prev + 1) % words.length);
+        }, 900);
+      }, 1200);
+    }
+    return () => clearTimeout(timeout);
+  }, [displayed, index]);
+  return (
+    <Typography
+      variant="h2"
+      component="span"
+      sx={{
+        fontWeight: 900,
+        fontSize: { xs: '2.2rem', md: '3.5rem' },
+        color: '#2451a6',
+        letterSpacing: 1,
+        lineHeight: 1.1,
+        display: 'inline-block',
+        minWidth: 210,
+      }}
+    >
+      {displayed}
+      <span className="typewriter-cursor">|</span>
+    </Typography>
+  );
+}
+
+// Add global style for blinking cursor
+const style = document.createElement('style');
+style.innerHTML = `.typewriter-cursor { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }`;
+document.head.appendChild(style);
+
 const Landing = () => {
   const theme = useTheme();
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(120deg, #e3f2fd 0%, #e8eaf6 100%)',
+        background: '#f5f8fd',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -56,7 +109,7 @@ const Landing = () => {
         left: -120,
         width: 320,
         height: 320,
-        background: 'radial-gradient(circle at 60% 40%, #6c63ff33 0%, #e3f2fd00 80%)',
+        background: 'radial-gradient(circle at 60% 40%, #2451a622 0%, #f5f8fd00 80%)',
         zIndex: 0,
         filter: 'blur(8px)'
       }} />
@@ -66,88 +119,132 @@ const Landing = () => {
         right: -100,
         width: 260,
         height: 260,
-        background: 'radial-gradient(circle at 40% 60%, #48c6ef33 0%, #e8eaf600 80%)',
+        background: 'radial-gradient(circle at 40% 60%, #b3c7f722 0%, #f5f8fd00 80%)',
         zIndex: 0,
         filter: 'blur(8px)'
       }} />
       {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ px: 4, py: 10, position: 'relative', zIndex: 1 }}>
-        <Box sx={{ textAlign: 'center', mb: 2 }}>
-          <Typography variant="h2" component="h1" sx={{ fontWeight: 900, fontSize: { xs: '2.2rem', md: '3.5rem' }, mb: 3, letterSpacing: 1 }}>
-            <GradientText>Find Your Perfect Roommate & Flat</GradientText>
-          </Typography>
-          <Typography variant="h5" sx={{ color: 'text.secondary', mb: 4, maxWidth: 700, mx: 'auto', fontWeight: 400, fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
-            RoomEase makes it easy to find compatible roommates and ideal living spaces.<br />
-            <span style={{ color: theme.palette.primary.main, fontWeight: 600 }}>Join our community and start your journey to better living.</span>
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-            <Button
-              component={Link}
-              to="/register"
-              variant="contained"
-              size="large"
-              endIcon={<ArrowForward />}
+      <Box sx={{ width: '100%', maxWidth: 'lg', mx: 'auto', px: { xs: 2, md: 4 }, py: { xs: 6, md: 10 }, position: 'relative', zIndex: 1 }}>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: { xs: 6, md: 8 },
+        }}>
+          {/* Left: Content */}
+          <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
+            <Typography variant="h2" component="h1" sx={{ fontWeight: 900, fontSize: { xs: '2.2rem', md: '3.5rem' }, mb: 0.5, letterSpacing: 1, lineHeight: 1.1, color: '#2451a6', textAlign: { xs: 'center', md: 'left' } }}>
+              Find Your Perfect
+            </Typography>
+            <Box sx={{ minHeight: { xs: 48, md: 60 }, display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 3 }}>
+              <TypewriterWords />
+            </Box>
+            <Typography variant="h5" sx={{ color: '#2451a6', mb: 4, maxWidth: 600, fontWeight: 400, fontSize: { xs: '1.1rem', md: '1.5rem' }, mx: { xs: 'auto', md: 0 }, textAlign: { xs: 'center', md: 'left' }, lineHeight: 1.6 }}>
+              RoomEase makes it easy to find compatible roommates and ideal living spaces.<br />
+              <span style={{ color: '#2451a6', fontWeight: 600 }}>Join our community and start your journey to better living.</span>
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: { xs: 'center', md: 'flex-start' }, alignItems: 'center', gap: 2, mt: 3 }}>
+              <Button
+                component={Link}
+                to="/auth"
+                variant="contained"
+                size="large"
+                endIcon={<ArrowForward />}
+                sx={{
+                  px: 5,
+                  py: 1.7,
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  fontSize: '1.2rem',
+                  background: '#2451a6',
+                  boxShadow: '0 4px 24px 0 rgba(60,72,100,0.10)',
+                  color: 'white',
+                  '&:hover': { background: '#1d3e7a' },
+                  transition: 'all 0.18s',
+                }}
+              >
+                Get Started
+              </Button>
+              <Button
+                component={Link}
+                to="/auth"
+                variant="outlined"
+                size="large"
+                sx={{
+                  px: 5,
+                  py: 1.7,
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  fontSize: '1.2rem',
+                  backgroundColor: '#fff',
+                  color: '#2451a6',
+                  border: '2px solid #2451a6',
+                  boxShadow: '0 2px 8px 0 rgba(60,72,100,0.08)',
+                  '&:hover': { backgroundColor: '#e3eafc', borderColor: '#2451a6', color: '#1d3e7a' },
+                  transition: 'all 0.18s',
+                }}
+              >
+                Sign In
+              </Button>
+            </Box>
+          </Box>
+          {/* Right: Hero Image */}
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, alignItems: 'center', mt: { xs: 5, md: 0 } }}>
+            <Box
+              component="img"
+              src={bgImg}
+              alt="Roommates moving in illustration"
               sx={{
-                px: 5,
-                py: 1.7,
-                borderRadius: '9999px',
-                fontWeight: 700,
-                fontSize: '1.2rem',
-                background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
-                boxShadow: '0 4px 24px 0 rgba(60,72,100,0.10)',
-                color: 'white',
-                '&:hover': { background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)' },
-                transition: 'all 0.18s',
+                width: { xs: 320, sm: 420, md: 600 },
+                maxWidth: '100%',
+                borderRadius: 6,
+                objectFit: 'contain',
+                background: 'none',
+                p: 0,
               }}
-            >
-              Get Started
-            </Button>
-            <Button
-              component={Link}
-              to="/auth"
-              variant="outlined"
-              size="large"
-              sx={{
-                px: 5,
-                py: 1.7,
-                borderRadius: '9999px',
-                fontWeight: 700,
-                fontSize: '1.2rem',
-                backgroundColor: 'white',
-                color: theme.palette.primary.main,
-                border: '2px solid',
-                borderColor: 'primary.main',
-                boxShadow: '0 2px 8px 0 rgba(60,72,100,0.08)',
-                '&:hover': { backgroundColor: '#f5f7fa', borderColor: '#48c6ef' },
-                transition: 'all 0.18s',
-              }}
-            >
-              Sign In
-            </Button>
+            />
           </Box>
         </Box>
-      </Container>
+      </Box>
 
-      {/* One-liner Message Bridge */}
+      {/* One-liner Message Bridge (revamped) */}
       <Box sx={{
         width: '100%',
-        py: 4,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        py: 3,
         background: 'transparent',
-        textAlign: 'center',
         position: 'relative',
         zIndex: 2,
       }}>
-        <Typography variant="h5" sx={{
-          fontWeight: 700,
-          color: 'primary.main',
-          fontSize: { xs: '1.2rem', md: '1.7rem' },
-          letterSpacing: 1,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 1,
-        }}>
-          <span role="img" aria-label="spark">✨</span> Your next home is just a match away! <span role="img" aria-label="home">🏠</span>
-        </Typography>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+        >
+          <Box sx={{
+            px: 4,
+            py: 2.2,
+            bgcolor: '#e3eafc',
+            borderRadius: '999px',
+            boxShadow: '0 2px 16px 0 rgba(60,72,100,0.08)',
+            display: 'inline-block',
+            minWidth: { xs: 260, md: 420 },
+            textAlign: 'center',
+          }}>
+            <Typography variant="h5" sx={{
+              fontWeight: 800,
+              color: '#2451a6',
+              fontSize: { xs: '1.25rem', md: '1.7rem' },
+              letterSpacing: 0.5,
+            }}>
+              Your next home is just a match away!
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
 
       {/* Match Visual Section */}
@@ -159,7 +256,7 @@ const Landing = () => {
         justifyContent: 'center',
         py: { xs: 8, md: 10 },
         px: 2,
-        background: 'linear-gradient(120deg, #f8fafc 0%, #e3e6f3 100%)',
+        background: '#e3eafc',
         borderRadius: { xs: '32px', md: '48px' },
         boxShadow: '0 8px 32px 0 rgba(60,72,100,0.10)',
         my: { xs: 6, md: 8 },
@@ -168,22 +265,31 @@ const Landing = () => {
         maxWidth: 1200,
         mx: 'auto',
       }}>
-        {/* Optional: Top Wave Divider */}
-        <Box sx={{ width: '100%', lineHeight: 0, position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-          <svg viewBox="0 0 1200 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 40, display: 'block' }}>
-            <path d="M0 0h1200v20c-100 15-200 20-300 20s-200-5-300-20C500 10 400 5 300 5S100 10 0 20V0z" fill="#e3e6f3"/>
-          </svg>
-        </Box>
-        <Typography variant="h4" sx={{
-          fontWeight: 800,
-          color: 'primary.main',
-          mb: 4,
-          textAlign: 'center',
-          fontSize: { xs: '1.5rem', md: '2.2rem' },
-          letterSpacing: 1,
-        }}>
-          Discover beautiful spaces and amazing people
-        </Typography>
+        {/* Removed SVG wave divider for a cleaner look */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          style={{ width: '100%' }}
+        >
+          <Typography variant="h3" sx={{
+            fontWeight: 900,
+            color: '#2451a6',
+            mb: 1.5,
+            textAlign: 'center',
+            fontSize: { xs: '2rem', md: '2.7rem' },
+            letterSpacing: 1,
+            lineHeight: 1.15,
+          }}>
+            Discover beautiful spaces and amazing people
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <Box sx={{ width: 64, height: 5, borderRadius: 3, bgcolor: '#b3c7f7' }} />
+          </Box>
+          <Typography variant="subtitle1" sx={{ color: '#4a5fa7', textAlign: 'center', fontWeight: 500, fontSize: { xs: '1.05rem', md: '1.18rem' }, mb: 2 }}>
+            Explore curated rooms and connect with like-minded roommates in a community built for you.
+          </Typography>
+        </motion.div>
         <Box sx={{
           position: 'relative',
           width: { xs: 320, sm: 420, md: 520 },
@@ -203,7 +309,7 @@ const Landing = () => {
             borderRadius: 5,
             boxShadow: '0 8px 32px 0 rgba(60,72,100,0.18)',
             overflow: 'hidden',
-            background: 'linear-gradient(120deg, #e3f2fd 0%, #e8eaf6 100%)',
+            background: '#f5f8fd',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -211,8 +317,8 @@ const Landing = () => {
             border: '2.5px solid #fff',
           }}>
             <img
-              src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80"
-              alt="Roommate"
+              src={friendlyRoommateImg}
+              alt="Friendly Roommate"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
             <Box sx={{
@@ -244,7 +350,7 @@ const Landing = () => {
             borderRadius: 5,
             boxShadow: '0 12px 36px 0 rgba(60,72,100,0.22)',
             overflow: 'hidden',
-            background: 'linear-gradient(120deg, #fffbe6 0%, #ffe0b2 100%)',
+            background: '#f5f8fd',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -253,8 +359,8 @@ const Landing = () => {
             transform: 'rotate(6deg)',
           }}>
             <img
-              src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
-              alt="Room"
+              src={beautifulRoomImg}
+              alt="Beautiful Room"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
             <Box sx={{
@@ -262,7 +368,7 @@ const Landing = () => {
               bottom: 0,
               left: 0,
               width: '100%',
-              bgcolor: 'rgba(255, 193, 7, 0.92)',
+              bgcolor: '#caddfe',
               color: '#232946',
               py: 1,
               px: 2,
@@ -276,19 +382,13 @@ const Landing = () => {
             </Box>
           </Box>
         </Box>
-        {/* Optional: Bottom Wave Divider */}
-        <Box sx={{ width: '100%', lineHeight: 0, position: 'absolute', bottom: 0, left: 0, zIndex: 1 }}>
-          <svg viewBox="0 0 1200 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 40, display: 'block' }}>
-            <path d="M0 20h1200V0c-100 15-200 20-300 20s-200-5-300-20C500 10 400 15 300 15S100 10 0 0v20z" fill="#e3e6f3"/>
-          </svg>
-        </Box>
       </Box>
 
       {/* Features Section */}
       <Box sx={{ backgroundColor: 'white', py: 10, position: 'relative', zIndex: 2 }}>
         <Container maxWidth="lg" sx={{ px: 4 }}>
           <Typography variant="h4" component="h2" sx={{ fontWeight: 900, textAlign: 'center', mb: 7, color: 'primary.main', letterSpacing: 1 }}>
-            How It Works
+            <span style={{ color: '#2451a6' }}>How It Works</span>
           </Typography>
           <Box sx={{
             display: 'flex',
@@ -306,7 +406,7 @@ const Landing = () => {
                 <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
-                      background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
+                      background: '#2451a6',
                       borderRadius: '50%',
                       width: 64,
                       height: 64,
@@ -321,7 +421,7 @@ const Landing = () => {
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                    Create a Profile
+                    <span style={{ color: '#2451a6' }}>Create a Profile</span>
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                     Build your personalized profile sharing your lifestyle, interests, and living preferences.
@@ -335,14 +435,14 @@ const Landing = () => {
                 <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
-                      background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)',
+                      background: '#b3c7f7',
                       borderRadius: '50%',
                       width: 64,
                       height: 64,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white',
+                      color: '#2451a6',
                       fontSize: 36,
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     }}>
@@ -350,7 +450,7 @@ const Landing = () => {
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                    Set Preferences
+                    <span style={{ color: '#2451a6' }}>Set Preferences</span>
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                     Customize your search with specific preferences like budget, location, and living habits.
@@ -364,7 +464,7 @@ const Landing = () => {
                 <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
-                      background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
+                      background: '#2451a6',
                       borderRadius: '50%',
                       width: 64,
                       height: 64,
@@ -379,7 +479,7 @@ const Landing = () => {
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                    Find Flats
+                    <span style={{ color: '#2451a6' }}>Find Flats</span>
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                     Browse through available flats and find your perfect living space.
@@ -393,14 +493,14 @@ const Landing = () => {
                 <StyledPaper elevation={3}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
                     <Box sx={{
-                      background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)',
+                      background: '#b3c7f7',
                       borderRadius: '50%',
                       width: 64,
                       height: 64,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white',
+                      color: '#2451a6',
                       fontSize: 36,
                       boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
                     }}>
@@ -408,7 +508,7 @@ const Landing = () => {
                     </Box>
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                    Swipe and Match
+                    <span style={{ color: '#2451a6' }}>Swipe and Match</span>
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                     Connect with potential roommates through our easy-to-use swipe interface.
@@ -422,7 +522,7 @@ const Landing = () => {
 
       {/* CTA Section */}
       <Box sx={{
-        background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
+        background: '#2451a6',
         color: 'white',
         py: 10,
         position: 'relative',
@@ -437,20 +537,20 @@ const Landing = () => {
           </Typography>
           <Button
             component={Link}
-            to="/register"
+            to="/auth"
             variant="contained"
             size="large"
             endIcon={<ArrowForward />}
             sx={{
-              background: 'white',
-              color: 'primary.main',
+              background: '#fff',
+              color: '#2451a6',
               px: 5,
               py: 1.7,
               borderRadius: '9999px',
               fontWeight: 700,
               fontSize: '1.2rem',
               boxShadow: '0 4px 24px 0 rgba(60,72,100,0.10)',
-              '&:hover': { background: '#f5f7fa', color: '#6c63ff' },
+              '&:hover': { background: '#b3c7f7', color: '#2451a6' },
               transition: 'all 0.18s',
             }}
           >
@@ -462,7 +562,7 @@ const Landing = () => {
       {/* Footer */}
       <Box component="footer" sx={{
         width: '100%',
-        background: 'linear-gradient(90deg, #232946 0%, #181c2f 100%)',
+        background: '#232946',
         borderTop: 'none',
         py: 7,
         mt: 0,
