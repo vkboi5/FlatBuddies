@@ -251,132 +251,140 @@ const Landing = () => {
       <Box sx={{
         width: '100%',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: { xs: 'column', md: 'row' },
         alignItems: 'center',
         justifyContent: 'center',
         py: { xs: 8, md: 10 },
-        px: 2,
-        background: '#e3eafc',
+        px: { xs: 2, md: 6 },
+        background: 'linear-gradient(120deg, #e3f2fd 0%, #b3c7f7 100%)',
         borderRadius: { xs: '32px', md: '48px' },
         boxShadow: '0 8px 32px 0 rgba(60,72,100,0.10)',
         my: { xs: 6, md: 8 },
         position: 'relative',
         zIndex: 3,
-        maxWidth: 1200,
+        maxWidth: 1300,
         mx: 'auto',
+        minHeight: { xs: 480, md: 420 },
       }}>
-        {/* Removed SVG wave divider for a cleaner look */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          style={{ width: '100%' }}
-        >
-          <Typography variant="h3" sx={{
-            fontWeight: 900,
-            color: '#2451a6',
-            mb: 1.5,
-            textAlign: 'center',
-            fontSize: { xs: '2rem', md: '2.7rem' },
-            letterSpacing: 1,
-            lineHeight: 1.15,
-          }}>
-            Discover beautiful spaces and amazing people
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <Box sx={{ width: 64, height: 5, borderRadius: 3, bgcolor: '#b3c7f7' }} />
-          </Box>
-          <Typography variant="subtitle1" sx={{ color: '#4a5fa7', textAlign: 'center', fontWeight: 500, fontSize: { xs: '1.05rem', md: '1.18rem' }, mb: 2 }}>
-            Explore curated rooms and connect with like-minded roommates in a community built for you.
-          </Typography>
-        </motion.div>
+        {/* Left: Text */}
+        <Box sx={{ flex: 1, minWidth: 280, pr: { md: 6 }, mb: { xs: 5, md: 0 } }}>
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <Typography variant="h3" sx={{
+              fontWeight: 900,
+              color: '#2451a6',
+              mb: 2,
+              textAlign: { xs: 'center', md: 'left' },
+              fontSize: { xs: '2rem', md: '2.7rem' },
+              letterSpacing: 1,
+              lineHeight: 1.15,
+            }}>
+              Discover beautiful spaces and amazing people
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 2 }}>
+              <Box sx={{ width: 64, height: 5, borderRadius: 3, bgcolor: '#b3c7f7' }} />
+            </Box>
+            <Typography variant="subtitle1" sx={{ color: '#4a5fa7', textAlign: { xs: 'center', md: 'left' }, fontWeight: 500, fontSize: { xs: '1.05rem', md: '1.18rem' }, mb: 2 }}>
+              Explore curated rooms and connect with like-minded roommates in a community built for you.
+            </Typography>
+          </motion.div>
+        </Box>
+        {/* Right: Visual Card Stack */}
         <Box sx={{
-          position: 'relative',
-          width: { xs: 320, sm: 420, md: 520 },
-          height: { xs: 220, sm: 260, md: 300 },
+          flex: 1.2,
+          minWidth: 320,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative',
+          height: { xs: 320, sm: 380, md: 420 },
         }}>
-          {/* Roommate Card */}
+          {/* Floating Card Stack */}
           <Box sx={{
             position: 'absolute',
-            left: { xs: 24, sm: 40, md: 60 },
-            top: { xs: 40, sm: 50, md: 60 },
+            left: { xs: 0, md: 40 },
+            top: { xs: 40, md: 60 },
             zIndex: 1,
-            width: { xs: 140, sm: 170, md: 200 },
-            height: { xs: 170, sm: 200, md: 230 },
-            borderRadius: 5,
-            boxShadow: '0 8px 32px 0 rgba(60,72,100,0.18)',
+            width: { xs: 180, sm: 220, md: 260 },
+            height: { xs: 220, sm: 260, md: 300 },
+            borderRadius: 7,
+            boxShadow: '0 12px 48px 0 rgba(36,81,166,0.18)',
             overflow: 'hidden',
-            background: '#f5f8fd',
+            background: 'linear-gradient(120deg, #2451a6 0%, #b3c7f7 100%)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            border: '2.5px solid #fff',
+            border: '3.5px solid #fff',
+            transform: 'rotate(-8deg)',
           }}>
             <img
               src={friendlyRoommateImg}
               alt="Friendly Roommate"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.93 }}
             />
             <Box sx={{
               position: 'absolute',
               bottom: 0,
               left: 0,
               width: '100%',
-              bgcolor: 'rgba(76, 110, 245, 0.85)',
+              bgcolor: 'rgba(36,81,166,0.92)',
               color: 'white',
-              py: 1,
+              py: 1.2,
               px: 2,
-              fontWeight: 600,
-              fontSize: { xs: '1rem', md: '1.1rem' },
+              fontWeight: 700,
+              fontSize: { xs: '1.1rem', md: '1.2rem' },
               textAlign: 'center',
               borderBottomLeftRadius: 18,
               borderBottomRightRadius: 18,
+              letterSpacing: 0.5,
+              boxShadow: '0 2px 12px 0 rgba(36,81,166,0.10)',
             }}>
               Friendly Roommate
             </Box>
           </Box>
-          {/* Room Card */}
           <Box sx={{
             position: 'absolute',
-            right: { xs: 24, sm: 40, md: 60 },
-            bottom: { xs: 20, sm: 30, md: 40 },
+            right: { xs: 0, md: 40 },
+            bottom: { xs: 0, md: 30 },
             zIndex: 2,
-            width: { xs: 170, sm: 210, md: 250 },
-            height: { xs: 120, sm: 150, md: 180 },
-            borderRadius: 5,
-            boxShadow: '0 12px 36px 0 rgba(60,72,100,0.22)',
+            width: { xs: 210, sm: 260, md: 320 },
+            height: { xs: 150, sm: 200, md: 240 },
+            borderRadius: 7,
+            boxShadow: '0 16px 56px 0 rgba(36,81,166,0.22)',
             overflow: 'hidden',
-            background: '#f5f8fd',
+            background: 'linear-gradient(120deg, #b3c7f7 0%, #e3f2fd 100%)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            border: '2.5px solid #fff',
-            transform: 'rotate(6deg)',
+            border: '3.5px solid #fff',
+            transform: 'rotate(7deg)',
           }}>
             <img
               src={beautifulRoomImg}
               alt="Beautiful Room"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.97 }}
             />
             <Box sx={{
               position: 'absolute',
               bottom: 0,
               left: 0,
               width: '100%',
-              bgcolor: '#caddfe',
-              color: '#232946',
-              py: 1,
+              bgcolor: '#e3f2fd',
+              color: '#2451a6',
+              py: 1.2,
               px: 2,
-              fontWeight: 700,
-              fontSize: { xs: '1rem', md: '1.1rem' },
+              fontWeight: 800,
+              fontSize: { xs: '1.1rem', md: '1.2rem' },
               textAlign: 'center',
               borderBottomLeftRadius: 18,
               borderBottomRightRadius: 18,
+              letterSpacing: 0.5,
+              boxShadow: '0 2px 12px 0 rgba(36,81,166,0.10)',
             }}>
               Beautiful Room
             </Box>
