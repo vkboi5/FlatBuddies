@@ -64,224 +64,149 @@ const ProfileDetail = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <IconButton
-        onClick={() => navigate('/explore')}
-        sx={{ mb: 3 }}
-      >
-        <FaArrowLeft />
-      </IconButton>
+    <Box sx={{ bgcolor: '#f5f8fd', minHeight: '100vh' }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <IconButton
+          onClick={() => navigate('/explore')}
+          sx={{ mb: 2, background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', '&:hover': { background: '#e3f2fd' } }}
+        >
+          <FaArrowLeft />
+        </IconButton>
 
-      <Paper
-        elevation={3}
-        sx={{
-          borderRadius: 4,
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        {/* Header Image */}
-        <Box
+        <Paper
+          elevation={0}
           sx={{
-            height: '400px',
+            borderRadius: 6,
+            overflow: 'hidden',
             position: 'relative',
-            backgroundImage: `url(${profile.profile?.photos?.[0] || 'https://via.placeholder.com/1200x400'})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%)',
-            },
+            background: '#fff',
+            boxShadow: '0 8px 32px 0 rgba(36,81,166,0.10)',
           }}
         >
+          {/* Header Image */}
           <Box
             sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              p: 4,
-              color: 'white',
+              height: { xs: 200, sm: 300 },
+              position: 'relative',
+              backgroundImage: `url(${profile.profile?.photos?.[0] || 'https://via.placeholder.com/1200x400'})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(to bottom, rgba(36,81,166,0.1) 0%, rgba(36,81,166,0.3) 100%)',
+              },
             }}
-          >
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Avatar
-                src={profile.profile?.photos?.[0]}
-                sx={{ width: 100, height: 100, border: '4px solid white' }}
-              />
-              <Box>
-                <Typography variant="h3" sx={{ fontWeight: 'bold', textShadow: '1px 1px 3px rgba(0,0,0,0.4)' }}>
-                  {profile.name}
-                </Typography>
-                {profile.profile?.age && (
-                  <Typography variant="h5" sx={{ fontWeight: 'light', textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
-                    {profile.profile.age} years old
-                  </Typography>
-                )}
+          />
+
+          {/* Content */}
+          <Box sx={{ mt: -12, position: 'relative', zIndex: 2 }}>
+            <Container maxWidth="md">
+              <Grid container spacing={4} alignItems="flex-end">
+                <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                  <Avatar
+                    src={profile.profile?.photos?.[0]}
+                    sx={{ width: 160, height: 160, border: '6px solid #fff', boxShadow: '0 4px 24px rgba(0,0,0,0.1)', mx: 'auto' }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={8}>
+                  <Box sx={{ color: 'text.primary', pb: 2, textAlign: { xs: 'center', md: 'left' } }}>
+                    <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                      {profile.name}
+                      {profile.profile?.age && (
+                        <Typography component="span" variant="h4" sx={{ fontWeight: 'light', ml: 1.5 }}>
+                          {profile.profile.age}
+                        </Typography>
+                      )}
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      {profile.profile?.occupation}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Box sx={{ p: { xs: 2, sm: 4 } }}>
+                <Grid container spacing={4}>
+                  {/* Basic Information */}
+                  <Grid item xs={12} md={4}>
+                    <Stack spacing={3}>
+                      <Paper sx={{ p: 3, borderRadius: 4, background: '#f7fafd', boxShadow: 'none' }}>
+                        <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#2451a6', fontWeight: 700 }}>
+                          <FaUser /> Basic Info
+                        </Typography>
+                        <Stack spacing={2}>
+                          {profile.profile?.education && (
+                            <Box>
+                              <Typography variant="subtitle2" color="text.secondary">Education</Typography>
+                              <Typography variant="body1">{profile.profile.education}</Typography>
+                            </Box>
+                          )}
+                          {profile.profile?.languages?.length > 0 && (
+                            <Box>
+                              <Typography variant="subtitle2" color="text.secondary">Languages</Typography>
+                              <Typography variant="body1">{profile.profile.languages.join(', ')}</Typography>
+                            </Box>
+                          )}
+                        </Stack>
+                      </Paper>
+
+                      <Paper sx={{ p: 3, borderRadius: 4, background: '#f7fafd', boxShadow: 'none' }}>
+                        <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#2451a6', fontWeight: 700 }}>
+                          <FaMapMarkerAlt /> Location
+                        </Typography>
+                        {profile.profile?.location?.city && (
+                          <Typography variant="body1">
+                            {profile.profile.location.city}
+                            {profile.profile.location.area && `, ${profile.profile.location.area}`}
+                          </Typography>
+                        )}
+                      </Paper>
+                    </Stack>
+                  </Grid>
+
+                  <Grid item xs={12} md={8}>
+                    <Stack spacing={3}>
+                      {profile.profile?.bio && (
+                        <Paper sx={{ p: 3, borderRadius: 4, background: '#f7fafd', boxShadow: 'none' }}>
+                          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#2451a6', fontWeight: 700 }}>
+                            <FaInfo /> About Me
+                          </Typography>
+                          <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                            {profile.profile.bio}
+                          </Typography>
+                        </Paper>
+                      )}
+
+                      {profile.profile?.interests?.length > 0 && (
+                        <Paper sx={{ p: 3, borderRadius: 4, background: '#f7fafd', boxShadow: 'none' }}>
+                          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#2451a6', fontWeight: 700 }}>
+                            <FaHeart /> Interests
+                          </Typography>
+                          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                            {profile.profile.interests.map((interest, index) => (
+                              <Chip
+                                key={index}
+                                label={interest}
+                                sx={{ m: 0.5, borderRadius: '999px', bgcolor: '#e3eafc', color: '#2451a6', fontWeight: 600 }}
+                              />
+                            ))}
+                          </Stack>
+                        </Paper>
+                      )}
+                    </Stack>
+                  </Grid>
+                </Grid>
               </Box>
-            </Stack>
+            </Container>
           </Box>
-        </Box>
-
-        {/* Content */}
-        <Box sx={{ p: 4 }}>
-          <Grid container spacing={4}>
-            {/* Basic Information */}
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FaUser /> Basic Information
-                </Typography>
-                <Stack spacing={2}>
-                  {profile.profile?.occupation && (
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Occupation</Typography>
-                      <Typography variant="body1">{profile.profile.occupation}</Typography>
-                    </Box>
-                  )}
-                  {profile.profile?.education && (
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Education</Typography>
-                      <Typography variant="body1">{profile.profile.education}</Typography>
-                    </Box>
-                  )}
-                  {profile.profile?.languages?.length > 0 && (
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Languages</Typography>
-                      <Typography variant="body1">{profile.profile.languages.join(', ')}</Typography>
-                    </Box>
-                  )}
-                </Stack>
-              </Paper>
-            </Grid>
-
-            {/* Location & Preferences */}
-            <Grid item xs={12} md={8}>
-              <Paper sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FaMapMarkerAlt /> Location & Preferences
-                </Typography>
-                <Grid container spacing={2}>
-                  {profile.profile?.location?.city && (
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle2" color="text.secondary">Location</Typography>
-                      <Typography variant="body1">
-                        {profile.profile.location.city}
-                        {profile.profile.location.area && `, ${profile.profile.location.area}`}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {profile.profile?.preferences?.budget && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Budget Range</Typography>
-                      <Typography variant="body1">
-                        ₹{profile.profile.preferences.budget.min} - ₹{profile.profile.preferences.budget.max}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {profile.profile?.preferences?.roommates?.gender && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Preferred Roommate Gender</Typography>
-                      <Typography variant="body1">
-                        {profile.profile.preferences.roommates.gender}
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Paper>
-
-              {/* Lifestyle Preferences */}
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FaUsers /> Lifestyle Preferences
-                </Typography>
-                <Grid container spacing={2}>
-                  {profile.profile?.preferences?.lifestyle && (
-                    <>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Cleanliness</Typography>
-                        <Typography variant="body1">
-                          {profile.profile.preferences.lifestyle.cleanliness}/10
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Social Level</Typography>
-                        <Typography variant="body1">
-                          {profile.profile.preferences.lifestyle.socialLevel}/10
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Work Mode</Typography>
-                        <Typography variant="body1">
-                          {profile.profile.preferences.lifestyle.workMode}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Smoking</Typography>
-                        <Typography variant="body1">
-                          {profile.profile.preferences.lifestyle.smoking}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Pets</Typography>
-                        <Typography variant="body1">
-                          {profile.profile.preferences.lifestyle.pets}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">Food Preference</Typography>
-                        <Typography variant="body1">
-                          {profile.profile.preferences.lifestyle.foodPreference}
-                        </Typography>
-                      </Grid>
-                    </>
-                  )}
-                </Grid>
-              </Paper>
-            </Grid>
-
-            {/* Bio */}
-            {profile.profile?.bio && (
-              <Grid item xs={12}>
-                <Paper sx={{ p: 3, borderRadius: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaInfo /> About Me
-                  </Typography>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {profile.profile.bio}
-                  </Typography>
-                </Paper>
-              </Grid>
-            )}
-
-            {/* Interests */}
-            {profile.profile?.interests?.length > 0 && (
-              <Grid item xs={12}>
-                <Paper sx={{ p: 3, borderRadius: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FaHeart /> Interests
-                  </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                    {profile.profile.interests.map((interest, index) => (
-                      <Chip
-                        key={index}
-                        label={interest}
-                        sx={{ m: 0.5 }}
-                      />
-                    ))}
-                  </Stack>
-                </Paper>
-              </Grid>
-            )}
-          </Grid>
-        </Box>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

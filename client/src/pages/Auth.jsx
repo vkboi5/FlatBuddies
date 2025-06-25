@@ -92,11 +92,11 @@ export default function Auth() {
           }}
         >
           {/* Brand/Logo */}
-          <Typography variant="h5" align="center" sx={{ fontWeight: 900, color: 'primary.main', letterSpacing: 1, mb: 1 }}>
+          <Typography variant="h5" align="center" sx={{ fontWeight: 900, color: '#2451a6', letterSpacing: 1, mb: 1 }}>
             FlatBuddies
           </Typography>
-          <Divider sx={{ width: 60, mx: 'auto', mb: 2, borderBottomWidth: 3, borderColor: 'primary.main' }} />
-          <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 800, mb: 2 }}>
+          <Divider sx={{ width: 60, mx: 'auto', mb: 2, borderBottomWidth: 3, borderColor: '#2451a6' }} />
+          <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 800, mb: 2, color: '#222' }}>
             {isLogin ? 'Welcome Back!' : 'Create Account'}
           </Typography>
 
@@ -141,9 +141,9 @@ export default function Auth() {
                   fontWeight: 700,
                   fontSize: '1.1rem',
                   py: 1.5,
-                  background: 'linear-gradient(90deg, #6c63ff 0%, #48c6ef 100%)',
-                  boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
-                  '&:hover': { background: 'linear-gradient(90deg, #48c6ef 0%, #6c63ff 100%)' },
+                  background: '#2451a6',
+                  boxShadow: '0 2px 8px 0 rgba(36,81,166,0.10)',
+                  '&:hover': { background: '#1d3e7a' },
                   transition: 'all 0.18s',
                 }}
               >
@@ -165,10 +165,10 @@ export default function Auth() {
               fontWeight: 700,
               fontSize: '1.1rem',
               py: 1.3,
-              color: 'primary.main',
-              borderColor: 'primary.main',
+              color: '#2451a6',
+              borderColor: '#b3c7f7',
               background: '#fff',
-              '&:hover': { background: '#e3f2fd', borderColor: '#48c6ef' },
+              '&:hover': { background: '#f7fafd', borderColor: '#2451a6' },
               transition: 'all 0.18s',
               mb: 1,
             }}
@@ -182,12 +182,12 @@ export default function Auth() {
             onClick={() => setIsLogin(!isLogin)}
             sx={{
               mt: 1,
-              color: 'primary.main',
+              color: '#2451a6',
               fontWeight: 600,
               fontSize: '1rem',
               borderRadius: '999px',
               textTransform: 'none',
-              '&:hover': { bgcolor: '#f5f7fa' },
+              '&:hover': { bgcolor: '#e3f2fd' },
               transition: 'all 0.18s',
             }}
           >

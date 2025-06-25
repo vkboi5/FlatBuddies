@@ -1637,23 +1637,11 @@ const OnboardingProfile = () => {
       <Box
         sx={{
           minHeight: '100vh',
-          background: gradientBackground,
+          background: 'linear-gradient(120deg, #e3f2fd 0%, #e8eaf6 100%)',
           py: { xs: 3, sm: 6 },
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '40vh',
-            background: primaryGradient,
-            opacity: 0.05,
-            zIndex: 0,
-          },
         }}
       >
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
@@ -1661,11 +1649,9 @@ const OnboardingProfile = () => {
             elevation={0} 
             sx={{ 
               p: { xs: 2, sm: 4 }, 
-              borderRadius: 4,
-              background: cardGradient,
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
+              borderRadius: 6,
+              background: '#fff',
+              boxShadow: '0 8px 32px 0 rgba(36,81,166,0.10)',
             }}
           >
             <Box sx={{ mb: 6 }}>
@@ -1675,10 +1661,9 @@ const OnboardingProfile = () => {
                 gutterBottom 
                 sx={{ 
                   fontWeight: 800,
-                  background: primaryGradient,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  color: '#2451a6',
                   mb: 3,
+                  letterSpacing: 1,
                 }}
               >
                 Complete Your Profile
@@ -1688,18 +1673,18 @@ const OnboardingProfile = () => {
                 alternativeLabel
                 sx={{
                   '& .MuiStepLabel-root .Mui-completed': {
-                    color: 'primary.main',
+                    color: '#2451a6',
                   },
                   '& .MuiStepLabel-root .Mui-active': {
-                    color: 'primary.main',
+                    color: '#2451a6',
                     fontWeight: 700,
                   },
                   '& .MuiStepLabel-label': {
-                    fontWeight: 500,
-                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    fontSize: '1rem',
                   },
                   '& .MuiStepConnector-line': {
-                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderColor: '#b3c7f7',
                   },
                 }}
               >
@@ -1714,11 +1699,11 @@ const OnboardingProfile = () => {
             <form onSubmit={handleSubmit}>
               <Box 
                 sx={{ 
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  borderRadius: 3,
+                  background: '#f7fafd',
+                  borderRadius: 4,
                   p: { xs: 2, sm: 4 },
                   mb: 4,
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.02)',
+                  boxShadow: '0 4px 12px rgba(36,81,166,0.04)',
                 }}
               >
                 {renderStep()}
@@ -1740,11 +1725,14 @@ const OnboardingProfile = () => {
                       px: 4,
                       py: 1.5,
                       borderRadius: '999px',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       borderWidth: 2,
+                      color: '#2451a6',
+                      borderColor: '#2451a6',
                       '&:hover': {
                         borderWidth: 2,
-                        background: 'rgba(0, 0, 0, 0.04)',
+                        background: '#e3eafc',
+                        borderColor: '#2451a6',
                       },
                     }}
                   >
@@ -1761,11 +1749,14 @@ const OnboardingProfile = () => {
                           px: 4,
                           py: 1.5,
                           borderRadius: '999px',
-                          fontWeight: 600,
+                          fontWeight: 700,
                           borderWidth: 2,
+                          color: '#2451a6',
+                          borderColor: '#2451a6',
                           '&:hover': {
                             borderWidth: 2,
-                            background: 'rgba(0, 0, 0, 0.04)',
+                            background: '#e3eafc',
+                            borderColor: '#2451a6',
                           },
                         }}
                       >
@@ -1779,11 +1770,14 @@ const OnboardingProfile = () => {
                           px: 4,
                           py: 1.5,
                           borderRadius: '999px',
-                          fontWeight: 600,
+                          fontWeight: 700,
                           borderWidth: 2,
+                          color: '#2451a6',
+                          borderColor: '#2451a6',
                           '&:hover': {
                             borderWidth: 2,
-                            background: 'rgba(0, 0, 0, 0.04)',
+                            background: '#e3eafc',
+                            borderColor: '#2451a6',
                           },
                         }}
                       >
@@ -1799,12 +1793,12 @@ const OnboardingProfile = () => {
                           px: 4,
                           py: 1.5,
                           borderRadius: '999px',
-                          fontWeight: 600,
-                          background: primaryGradient,
-                          boxShadow: '0 4px 14px 0 rgba(0, 118, 255, 0.39)',
+                          fontWeight: 700,
+                          background: '#2451a6',
+                          color: '#fff',
+                          boxShadow: '0 4px 14px 0 rgba(36,81,166,0.10)',
                           '&:hover': {
-                            background: 'linear-gradient(90deg, #1488CC 0%, #2B32B2 100%)',
-                            boxShadow: '0 6px 20px rgba(0, 118, 255, 0.23)',
+                            background: '#1d3e7a',
                           },
                         }}
                       >
@@ -1819,12 +1813,12 @@ const OnboardingProfile = () => {
                           px: 4,
                           py: 1.5,
                           borderRadius: '999px',
-                          fontWeight: 600,
-                          background: primaryGradient,
-                          boxShadow: '0 4px 14px 0 rgba(0, 118, 255, 0.39)',
+                          fontWeight: 700,
+                          background: '#2451a6',
+                          color: '#fff',
+                          boxShadow: '0 4px 14px 0 rgba(36,81,166,0.10)',
                           '&:hover': {
-                            background: 'linear-gradient(90deg, #1488CC 0%, #2B32B2 100%)',
-                            boxShadow: '0 6px 20px rgba(0, 118, 255, 0.23)',
+                            background: '#1d3e7a',
                           },
                         }}
                       >
