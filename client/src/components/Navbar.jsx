@@ -125,15 +125,20 @@ export default function Navbar() {
     </Drawer>
   );
 
-  return (
-    <AppBar position="sticky" elevation={0} sx={{
-      background: '#2451a6',
-      borderBottom: '2.5px solid #b3c7f7',
-      boxShadow: '0 4px 24px 0 rgba(60,72,100,0.10)',
-      borderBottomLeftRadius: 16,
-      borderBottomRightRadius: 16,
-      minHeight: 72,
-    }}>
+      return (
+      <AppBar position="sticky" elevation={0} sx={{
+        background: '#fff',
+        borderRadius: '2.5rem',
+        top: { xs: 16, md: 24 },
+        mt: { xs: 2, md: 3 },
+        mx: { xs: 1, md: 'auto' },
+        width: { xs: '98%', md: '92%' },
+        border: '2.5px solid #2451a6',
+        boxShadow: '0 8px 32px 0 rgba(36,81,166,0.10)',
+        minHeight: 76,
+        zIndex: 1201,
+        transition: 'all 0.25s cubic-bezier(.4,2,.6,1)',
+      }}>
       <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 4 } }}>
         <Toolbar disableGutters sx={{ minHeight: 72 }}>
           {/* Logo */}
@@ -146,18 +151,19 @@ export default function Navbar() {
               mr: 2,
               display: { xs: 'none', md: 'flex' },
               fontWeight: 900,
-              fontSize: '2rem',
+              fontSize: '2.1rem',
               letterSpacing: 1,
-              color: 'white',
+              color: '#2451a6',
               textDecoration: 'none',
               cursor: 'pointer',
+              transition: 'color 0.18s',
               '&:hover': {
-                opacity: 0.92,
+                color: '#1d3e7a',
               },
             }}
           >
-            <span style={{fontWeight: 900, letterSpacing: 2, color: '#fff'}}>Flat</span>
-            <span style={{fontWeight: 400, letterSpacing: 1, color: '#fff'}}>Buddies</span>
+            <span style={{fontWeight: 900, letterSpacing: 2}}>Flat</span>
+            <span style={{fontWeight: 900, letterSpacing: 1}}>Buddies</span>
           </Typography>
 
           {/* Mobile menu button */}
@@ -165,7 +171,7 @@ export default function Navbar() {
             <IconButton
               size="large"
               edge="start"
-              sx={{ color: 'white', mr: 2, bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 2, '&:hover': { bgcolor: 'rgba(255,255,255,0.18)' } }}
+              sx={{ color: '#2451a6', mr: 2, bgcolor: 'rgba(36,81,166,0.08)', borderRadius: 2, '&:hover': { bgcolor: 'rgba(36,81,166,0.15)' } }}
               aria-label="menu"
               onClick={() => setMobileMenuOpen(true)}
             >
@@ -185,16 +191,16 @@ export default function Navbar() {
               flexGrow: 1,
               fontWeight: 900,
               fontSize: '1.5rem',
-              color: 'white',
+              color: '#2451a6',
               textDecoration: 'none',
               cursor: 'pointer',
               '&:hover': {
-                opacity: 0.92,
+                color: '#1d3e7a',
               },
-              textShadow: '0 2px 8px rgba(60,72,100,0.10)'
+              textShadow: '0 2px 8px rgba(36,81,166,0.08)'
             }}
           >
-            <span style={{fontWeight: 900, color: '#fff'}}>Flat</span><span style={{fontWeight: 400, color: '#b3c7f7'}}>Buddies</span>
+            <span style={{fontWeight: 900, color: '#2451a6'}}>Flat</span><span style={{fontWeight: 400, color: '#4a5fa7'}}>Buddies</span>
           </Typography>
 
           {/* Desktop Navigation */}
@@ -209,21 +215,21 @@ export default function Navbar() {
                   startIcon={item.icon}
                   sx={{
                     my: 2,
-                    color: location.pathname === item.path ? '#2451a6' : '#fff',
-                    background: location.pathname === item.path ? '#fff' : 'transparent',
+                    color: location.pathname === item.path ? '#fff' : '#2451a6',
+                    background: location.pathname === item.path ? 'linear-gradient(90deg, #2451a6 0%, #4a5fa7 100%)' : 'transparent',
                     fontWeight: 700,
                     borderRadius: '999px',
                     px: 2.5,
                     py: 1.2,
                     mx: 1.2,
                     fontSize: '1rem',
-                    boxShadow: location.pathname === item.path ? '0 2px 8px 0 rgba(60,72,100,0.10)' : 'none',
+                    boxShadow: location.pathname === item.path ? '0 2px 12px 0 rgba(36,81,166,0.10)' : 'none',
                     position: 'relative',
                     transition: 'all 0.18s',
                     '&:hover': {
-                      background: '#2d5db3',
+                      background: 'linear-gradient(90deg, #4a5fa7 0%, #2451a6 100%)',
                       color: '#fff',
-                      boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)'
+                      boxShadow: '0 2px 12px 0 rgba(36,81,166,0.13)'
                     },
                   }}
                 >
@@ -243,18 +249,23 @@ export default function Navbar() {
                       alt={userProfile?.profile?.name || currentUser.displayName || 'User'} 
                       src={userProfile?.profile?.photos?.[0] || currentUser.photoURL || `https://ui-avatars.com/api/?name=${userProfile?.profile?.name || currentUser.displayName || 'User'}`}
                       sx={{
-                        border: '2.5px solid #b3c7f7',
-                        background: '#b3c7f7',
+                        border: '3px solid #2451a6',
+                        background: '#e3f2fd',
                         color: '#2451a6',
-                        boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
-                        width: 44,
-                        height: 44,
+                        boxShadow: '0 4px 16px 0 rgba(36,81,166,0.10)',
+                        width: 48,
+                        height: 48,
+                        transition: 'all 0.18s',
+                        '&:hover': {
+                          borderColor: '#4a5fa7',
+                          boxShadow: '0 6px 24px 0 rgba(36,81,166,0.13)',
+                        },
                       }}
                     />
                   </IconButton>
                 </Tooltip>
                 <Menu
-                  sx={{ mt: '45px', '& .MuiPaper-root': { borderRadius: 3, boxShadow: '0 8px 32px 0 rgba(60,72,100,0.16)' } }}
+                  sx={{ mt: '45px', '& .MuiPaper-root': { borderRadius: 3, boxShadow: '0 8px 32px 0 rgba(36,81,166,0.16)' } }}
                   id="menu-appbar"
                   anchorEl={anchorElUser}
                   anchorOrigin={{
@@ -290,12 +301,12 @@ export default function Navbar() {
                   px: 2.5,
                   py: 1.2,
                   fontSize: '1rem',
-                  boxShadow: '0 2px 8px 0 rgba(60,72,100,0.10)',
-                  background: '#fff',
-                  color: '#2451a6',
+                  boxShadow: '0 2px 12px 0 rgba(36,81,166,0.10)',
+                  background: 'linear-gradient(90deg, #2451a6 0%, #4a5fa7 100%)',
+                  color: '#fff',
                   '&:hover': {
-                    background: '#b3c7f7',
-                    color: '#2451a6',
+                    background: 'linear-gradient(90deg, #4a5fa7 0%, #2451a6 100%)',
+                    color: '#fff',
                   },
                 }}
               >
@@ -312,12 +323,15 @@ export default function Navbar() {
         onClose={() => setMobileMenuOpen(false)}
         PaperProps={{
           sx: {
-            background: 'linear-gradient(120deg, #f8fafc 0%, #e3e6f3 100%)',
-            boxShadow: '0 8px 32px 0 rgba(60,72,100,0.16)',
-            borderTopRightRadius: 24,
-            borderBottomRightRadius: 24,
+            background: 'linear-gradient(120deg, #e3f2fd 0%, #b3c7f7 100%)',
+            boxShadow: '0 8px 32px 0 rgba(36,81,166,0.16)',
+            borderTopRightRadius: 32,
+            borderBottomRightRadius: 32,
+            borderTopLeftRadius: 32,
+            borderBottomLeftRadius: 32,
             width: 270,
             py: 2,
+            border: '2.5px solid #2451a6',
           }
         }}
       >
@@ -335,12 +349,12 @@ export default function Navbar() {
                   my: 1,
                   px: 2,
                   py: 1.5,
-                  background: location.pathname === item.path ? '#fff' : 'transparent',
-                  color: location.pathname === item.path ? '#2451a6' : '#fff',
+                  background: location.pathname === item.path ? 'linear-gradient(90deg, #2451a6 0%, #4a5fa7 100%)' : 'transparent',
+                  color: location.pathname === item.path ? '#fff' : '#2451a6',
                   fontWeight: 600,
                   fontSize: '1.1rem',
                   '&:hover': {
-                    background: '#2d5db3',
+                    background: 'linear-gradient(90deg, #4a5fa7 0%, #2451a6 100%)',
                     color: '#fff',
                   },
                 }}
